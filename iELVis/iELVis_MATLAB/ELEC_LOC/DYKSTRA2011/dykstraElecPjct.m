@@ -173,19 +173,20 @@ for hemLoop=0:1,
         
         %% Brain Shift Correction
         useIds=intersect(hemIds,sduralIds);
-        if universalYes(minimizeChange)
-            % Project subdural electrodes to dural surface while minimizing
-            % distortion
-            coordDural=snap2dural_energy(jitCtRAS(useIds,:),surf);
-        else
-            %Simply assign subdural electrodes to the nearest dural vertex
-            coordDural=get_loc_snap_mgh(jitCtRAS(useIds,:),surfPath,hem,'pial-outer-smoothed');
+        if ~isempty(useIds)
+            if universalYes(minimizeChange)
+                % Project subdural electrodes to dural surface while minimizing
+                % distortion
+                coordDural=snap2dural_energy(jitCtRAS(useIds,:),surf);
+            else
+                %Simply assign subdural electrodes to the nearest dural vertex
+                coordDural=get_loc_snap_mgh(jitCtRAS(useIds,:),surfPath,hem,'pial-outer-smoothed');
+            end
+            duralRAS(useIds,:)=coordDural;
+            
+            %% Project dural locations to pial surface
+            pialRAS(useIds,:)=get_loc_snap_mgh(coordDural,surfPath,hem,'pial');
         end
-        duralRAS(useIds,:)=coordDural;
-
-        %% Project dural locations to pial surface
-        pialRAS(useIds,:)=get_loc_snap_mgh(coordDural,surfPath,hem,'pial');
-        
     end
 end
 
