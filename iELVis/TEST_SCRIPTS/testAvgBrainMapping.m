@@ -64,23 +64,6 @@ cfg.title='PT001, TWH035 on Avg. Brain';
 cfg.surfType='inflated';
 cfgOut=plotPialSurf('fsaverage',cfg);
 
-%% Test lomni plot 
-cfg=[];
-cfg.view='lomni';
-cfg.elecCoord=[groupAvgCoords groupIsLeft];
-cfg.elecNames=groupLabels;
-cfg.showLabels='n';
-cfg.title='PT001, TWH035 on Avg. Brain';
-cfgOut=plotPialSurf('fsaverage',cfg);
-
-%% Test romni plot 
-cfg=[];
-cfg.view='romni';
-cfg.elecCoord=[groupAvgCoords groupIsLeft];
-cfg.elecNames=groupLabels;
-cfg.showLabels='n';
-cfg.title='PT001, TWH035 on Avg. Brain';
-cfgOut=plotPialSurf('fsaverage',cfg);
 
 
 %%

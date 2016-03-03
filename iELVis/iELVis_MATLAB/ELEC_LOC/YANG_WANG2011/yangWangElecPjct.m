@@ -251,11 +251,14 @@ for hemLoop=1:2,
         end
         
         %% Process strip elecs
-        elec_strip = ntools_elec_calc_strip(elec_strip,subPath,hem);
+        if nStripThisHem,
+            elec_strip = ntools_elec_calc_strip(elec_strip,subPath,hem);
+        end
         
         %% Snap subdural electrodes to the pial surface
-        pialRAS=zeros(nGridThisHem+nStripThisHem,3);
         ct=0;
+        nSnapThisHem=nGridThisHem+nStripThisHem;
+        pialRAS=zeros(nSnapThisHem+nDepthThisHem,3);
         for a=1:nGridThisHem,
             ct=ct+1;
             for b=1:3,
@@ -268,9 +271,11 @@ for hemLoop=1:2,
                 pialRAS(ct,b)=elec_strip{a,b+2};
             end
         end
-        pialRAS = snap2surf(pialRAS,fullfile(subPath,'surf'),hem(1),'pial');
+        if nSnapThisHem,
+            pialRAS = snap2surf(pialRAS(1:ct,:),fullfile(subPath,'surf'),hem(1),'pial');
+        end
         
-        % add depth coords, which are not snapped to surface
+        %% Add depth coords, which are not snapped to surface
         for a=1:nDepthThisHem,
             ct=ct+1;
             for b=1:3,

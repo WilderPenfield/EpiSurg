@@ -6,7 +6,6 @@ cfg.figId=1;
 cfg.overlayParcellation='DK';
 cfg.showLabels='y';
 cfg.title=[];
-%cfgOut=plotPialSurf('NiAs',cfg);
 cfgOut=plotPialSurf('TWH013',cfg);
 
 
@@ -27,5 +26,4 @@ cfg.view='omni';
 cfg.figId=3;
 cfg.showLabels='n';
 cfg.title=[];
-%cfgOut=plotPialSurf('NiAs',cfg);
 cfgOut=plotPialSurf('TWH013',cfg);

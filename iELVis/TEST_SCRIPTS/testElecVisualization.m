@@ -1,4 +1,4 @@
-printEm=1;
+printEm=0;
 
 %% DK atlas with elecs and labels
 cfg=[];
@@ -46,7 +46,7 @@ cfg.elecShape='sphere';
 cfg.elecColors=rand(8,1);
 cfg.elecColorScale='minmax';
 cfg.showLabels='n';
-cfg.units='r';
+cfg.elecUnits='r';
 cfg.elecNames=elecNames;
 cfg.elecSize=2;
 cfg.title='PT001: Stimulus Correlations';
@@ -71,7 +71,7 @@ cfg.view='l';
 cfg.figId=2;
 cfg.pairs=pairs;
 cfg.showLabels='n';
-cfg.units='r';
+cfg.elecUnits='r';
 cfg.title='PT001: Stimulus Correlations';
 cfg_out=plotPialSurf('PT001',cfg);
 if printEm,

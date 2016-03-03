@@ -38,8 +38,8 @@ duralRAS=zeros(nChan,3);
 ctRAS=zeros(nChan,3);
 for a=1:nChan,
     for b=1:3,
-       ctRAS(a,b)=str2num(ctCsv{a,b}); 
-       duralRAS(a,b)=str2num(duralCsv{a,b});
+        ctRAS(a,b)=str2num(ctCsv{a,b});
+        duralRAS(a,b)=str2num(duralCsv{a,b});
     end
 end
 
@@ -103,45 +103,47 @@ ylabel('Pos- Ant+');
 zlabel('Inf- Sup+');
 
 % Plot shift distances on pial surface
-if universalYes(plotPial)
-    if sum(leftHem)
-        if sum(~leftHem)
-            vw='omni';
-        else
-            vw='lomni';
-        end
-    else
-        vw='romni';
-    end
-    figH(2)=figure;
-    cfg=[];
-    cfg.view=vw;
-    cfg.figId=figH(2);
-    cfg.elecColors=shiftDist;
-    cfg.elecColorScale='justpos';
-    cfg.units='mm';
-    cfg.elecNames=chanName;
-    cfg.showLabels='n';
-    cfg.title=sprintf('%s: CT to Dural distance',sub);
-    cfg_out=plotPialSurf(sub,cfg);
-    
-    if universalYes(printEm)
-        % Make sure PICS directory exists
-        outPath=fullfile(erPath,'PICS');
-        if ~exist(outPath,'dir')
-            dirSuccess=mkdir(outPath);
-            if ~dirSuccess,
-                error('Could not create directory %s',dirSuccess);
+if ~isempty(non_depth_ids)
+    if universalYes(plotPial)
+        if sum(leftHem)
+            if sum(~leftHem)
+                vw='omni';
+            else
+                vw='lomni';
             end
+        else
+            vw='romni';
         end
-        outFigFname=fullfile(outPath,sprintf('%s_ShiftDist.jpg',sub));
-        %outFigFname=sprintf('%s/PICS/electrodes/%s_ShiftDist.jpg',erPath,sub);
-        print(figH(1),'-djpeg',outFigFname);
-        outFigFname=fullfile(outPath,sprintf('%s_ShiftDist',sub));
-        %outFigFname=sprintf('%s/PICS/electrodes/%s_ShiftDist',erPath,sub);
-        savefig(figH(1),outFigFname);
-        outFigFname=fullfile(outPath,sprintf('%s_ShiftDistOnBrain.jpg',sub));
-        %outFigFname=sprintf('%s/PICS/electrodes/%s_ShiftDistOnBrain.jpg',erPath,sub);
-        print(figH(2),'-djpeg',outFigFname);
+        figH(2)=figure;
+        cfg=[];
+        cfg.view=vw;
+        cfg.figId=figH(2);
+        cfg.elecColors=shiftDist;
+        cfg.elecColorScale='justpos';
+        cfg.elecUnits='mm';
+        cfg.elecNames=chanName;
+        cfg.showLabels='n';
+        cfg.title=sprintf('%s: CT to Dural distance',sub);
+        cfg_out=plotPialSurf(sub,cfg);
+        
+        if universalYes(printEm)
+            % Make sure PICS directory exists
+            outPath=fullfile(erPath,'PICS');
+            if ~exist(outPath,'dir')
+                dirSuccess=mkdir(outPath);
+                if ~dirSuccess,
+                    error('Could not create directory %s',dirSuccess);
+                end
+            end
+            outFigFname=fullfile(outPath,sprintf('%s_ShiftDist.jpg',sub));
+            %outFigFname=sprintf('%s/PICS/electrodes/%s_ShiftDist.jpg',erPath,sub);
+            print(figH(1),'-djpeg',outFigFname);
+            outFigFname=fullfile(outPath,sprintf('%s_ShiftDist',sub));
+            %outFigFname=sprintf('%s/PICS/electrodes/%s_ShiftDist',erPath,sub);
+            savefig(figH(1),outFigFname);
+            outFigFname=fullfile(outPath,sprintf('%s_ShiftDistOnBrain.jpg',sub));
+            %outFigFname=sprintf('%s/PICS/electrodes/%s_ShiftDistOnBrain.jpg',erPath,sub);
+            print(figH(2),'-djpeg',outFigFname);
+        end
     end
 end
