@@ -7,13 +7,21 @@ function [map, limits, cmap]=vals2Colormap(vals,type,cmap,minmax)
 %  type - 'absmax', 'minmax', 'justpos', 'justneg', or a 2D numeric vector.
 %  If a 2D numeric vector, the first element is taken as the min and the
 %  second as the max value of the colormap.
-%  cmap - 'parula', 'jet' or 'rb'. No effect if 'justpos' or 'justneg' selected as type.
 %
-%  Note 'rb' is still a work in progress!
 %
-% Optional Input:
+% Optional Inputs:
+%  cmap   - 'parula' or 'jet'. No effect if 'justpos' or 'justneg' selected as type.
+%           {default: 'parula' for MATLAB R2014 or more recent, otherwise
+%           'jet'}
 %  minmax - Two element vector specifying the low and high limits of the
 %           color scale (in units of vals). {default: derived from vals}
+%
+%
+% Outputs:
+%  map   -  n x 3 matrix of RGB values corresponding to n-dimensional vals
+%           vector
+%  limits - [min max] values corresponding to min and max of the colorscale
+%  cmap   - The name of the colormap used
 %
 % Author: David Groppe
 % Mehtalab 2012
@@ -80,13 +88,7 @@ if isnumeric(type)
 
 elseif strcmpi(type,'absmax')
     %absmax color scaling
-    if verLessThan('matlab','8.0.1')
-        rgb_vals=colormap('jet');
-        %load jet_cmap. I did this in the past instead of calling colormap.
-        %I don't remember why.
-    else
-        rgb_vals=colormap('parula');
-    end
+    rgb_vals=colormap(cmap);
     n_colors=size(rgb_vals,1);
     
     if isempty(minmax)
@@ -101,12 +103,7 @@ elseif strcmpi(type,'absmax')
     map=rgb_vals(temp_vals,:);
 elseif strcmpi(type,'minmax')
     %minmax color scaling
-    if verLessThan('matlab','8.0.1')
-        rgb_vals=colormap('jet');
-        %load jet_cmap
-    else
-        rgb_vals=colormap('parula');
-    end
+    rgb_vals=colormap(cmap);
     n_colors=size(rgb_vals,1);
     
     if isempty(minmax)
@@ -155,8 +152,7 @@ elseif strcmpi(type,'justpos') || strcmpi(type,'justneg')
     
     % Computer color indices for data values
     n_colors=size(rgb_vals,1);
-    delt=(cbar_max-cbar_min)/(n_colors-1);
-    data2color_values=cbar_min:delt:cbar_max;
+    data2color_values=linspace(cbar_min,cbar_max,n_colors);
     n_vals=length(vals);
     map=zeros(n_vals,3);
     for i=1:n_vals
