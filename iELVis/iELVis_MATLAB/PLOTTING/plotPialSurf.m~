@@ -1300,11 +1300,15 @@ end
 if universalYes(elecCbar) && universalYes(olayCbar),
     % Colorbar for electrodes
     pos=[.4 .09 .2 .01];
-    cbarDGplus(pos,elecUsedLimits,elecCmapName,5,elecUnits,'right');
-
+    cbarDGplus(pos,elecUsedLimits,elecCmapName,5);
+    %elecUnits
+    
     % Colorbar for pial surface overlay (e.g., neuroimaging)
     pos=[.4 .04 .2 .01];
-    cbarDGplus(pos,olayUsedLimits,olayCmapName,5,olayUnits,'right');
+    cbarDGplus(pos,olayUsedLimits,olayCmapName,5);
+    ht=ylabel(olayUnits);
+    set(ht,'fontsize',12,'rotation',0,'VerticalAlignment','middle','HorizontalAlignment',);
+    %olayUnits
 elseif universalYes(elecCbar),
     % Colorbar for electrodes
     pos=[.4 .06 .2 .03];
