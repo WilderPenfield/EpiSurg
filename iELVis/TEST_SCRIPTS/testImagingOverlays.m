@@ -64,3 +64,6 @@ cfg.olayUnits='z';
 cfg.pialOverlay{1}='/Applications/freesurfer/subjects/DoBr/fMRI/session_090711/RHandMotor/RHandMotor.feat/reg_surf-lh-DoBr/stats/zstat2.mgh';
 cfg.pialOverlay{2}='/Applications/freesurfer/subjects/DoBr/fMRI/session_090711/RHandMotor/RHandMotor.feat/reg_surf-rh-DoBr/stats/zstat2.mgh';
 cfgOut=plotPialSurf('DoBr',cfg);
+
+%%
+disp('testImagingOverlays.m completed successfully.');

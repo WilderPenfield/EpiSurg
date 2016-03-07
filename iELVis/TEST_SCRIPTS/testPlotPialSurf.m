@@ -2,6 +2,7 @@
 cfg=[];
 %cfg.view='r';
 cfg.view='l';
+%cfg.view='omni';
 cfg.figId=1;
 cfg.overlayParcellation='DK';
 cfg.showLabels='y';
