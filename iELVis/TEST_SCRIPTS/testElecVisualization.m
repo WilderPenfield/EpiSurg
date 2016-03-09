@@ -41,7 +41,6 @@ for a=1:8,
 end
 cfg=[];
 cfg.view='l';
-cfg.figId=1;
 cfg.elecShape='sphere';
 cfg.elecColors=rand(8,1);
 cfg.elecColorScale='minmax';
@@ -68,7 +67,6 @@ for a=1:7,
 end
 cfg=[];
 cfg.view='l';
-cfg.figId=2;
 cfg.pairs=pairs;
 cfg.showLabels='n';
 cfg.elecUnits='r';

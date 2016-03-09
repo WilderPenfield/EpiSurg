@@ -62,5 +62,6 @@ plotMgridOnPial('PT001',1);
 cfg=[]; cfg.printFigs=1;
 plotMgridOnSlices('PT001',cfg);
 
+
 %%
 disp('Script testBrainShift.m completed successfully.')

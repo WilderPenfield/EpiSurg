@@ -60,8 +60,25 @@ end
 
 % read the surf file
 surf = fs_read_surf([subjectpath '/surf/' sph '.pial-outer-smoothed']);
+% This varies depending on the version of FreeSurfer
 if ~isfield(surf,'coords')
-    surf.coords = surf.vertices;
+    if isfield(surf,'vertices')
+        surf.coords = surf.vertices;
+        surf=rmfield(surf,'vertices');
+    else
+        surf.coords = surf.coord;
+        surf=rmfield(surf,'coord');
+    end
+end
+if size(surf.coords,2)~=3
+    surf.coords=surf.coords';
+end
+if ~isfield(surf,'faces')
+    surf.faces=surf.tri;
+    surf=rmfield(surf,'tri');
+end
+if size(surf.faces,2)~=3
+    surf.faces=surf.faces';
 end
 
 %% get the mesial side data

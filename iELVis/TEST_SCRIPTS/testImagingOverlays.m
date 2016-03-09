@@ -4,11 +4,11 @@
 %%
 cfg=[];
 cfg.view='lomni';
-cfg.figId=2;
+cfg.figId=1;
 cfg.olayUnits='z';
 cfg.pialOverlay='/Users/davidgroppe/GIT/EpiSurg/iELVis/EXAMPLE_NII_FILES/handMotorLH.mgh';
 cfgOut=plotPialSurf('PT001',cfg);
-% print -f2 -djpeg fmriOlayPial
+% print -f1 -djpeg fmriOlayPial
 
 
 %%
