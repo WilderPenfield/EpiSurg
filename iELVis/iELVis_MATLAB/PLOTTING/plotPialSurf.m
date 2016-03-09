@@ -358,6 +358,8 @@ if ~isfield(cfg, 'olayThresh'), olayThresh=0;  else olayThresh=cfg.olayThresh; e
 if ~isfield(cfg, 'olayCbar'),       olayCbar=[];          else olayCbar=cfg.olayCbar; end 
 if ~isfield(cfg, 'olayUnits'),      olayUnits=[];         else olayUnits=cfg.olayUnits; end
 
+global overlayData elecCbarMin elecCbarMax olayCbarMin olayCbarMax; % Needed for ?omni plots
+
 try 
 checkCfg(cfg,'plotPialSurf.m');
 elecCmapName=[]; % needed for cfgOut
@@ -451,60 +453,65 @@ if strcmpi(surfType,'inflated')
     curvMap(ncurvIds,:)=repmat([1 1 1]*.7,length(ncurvIds),1);
 end
 
-global overlayData elecCbarMin elecCbarMax olayCbarMin olayCbarMax; % Needed for ?omni plots
-
-% Initialize pial surface coloration
-if strcmp(surfType,'inflated')
-    % Color gyri and sulci different shades of grey
-    if side == 'r'
-        curv = read_curv([surfacefolder 'rh.curv']);
-    else
-        curv = read_curv([surfacefolder 'lh.curv']);
-    end
+%% Initialize pial surface coloration
+% Color gyri and sulci different shades of grey
+if side == 'r'
+    curv = read_curv([surfacefolder 'rh.curv']);
+else
+    curv = read_curv([surfacefolder 'lh.curv']);
+end
+if strcmpi(surfType,'inflated')
     overlayDataTemp=zeros(length(curv),3);
     pcurvIds=find(curv>=0);
     overlayDataTemp(pcurvIds,:)=repmat([1 1 1]*.3,length(pcurvIds),1);
     ncurvIds=find(curv<0);
     overlayDataTemp(ncurvIds,:)=repmat([1 1 1]*.7,length(ncurvIds),1);
 else
-    overlayDataTemp=[.7 .7 .7]; % make it all grey
+    overlayDataTemp=ones(length(curv),3)*.7;
 end
+
 
 if ~isempty(overlayData) || ~isempty(pialOverlay)
     % Pial Surface Overlay (e.g., fMRI statistical maps)
-    [pathstr, name, ext]=fileparts(pialOverlay);
-    if strcmpi(ext,'.mgh')
-        % FreeSurfer formatted file
-        mgh = MRIread(pialOverlay);
-        overlayData=mgh.vol;
-    else
-        % mat file that needs to contain an mgh variable
-        if ~exist(pialOverlay,'file')
-            error('File %s not found.',pialOverlay);
-        end
-        load(pialOverlay,'overlayData');
-        if ~exist('overlayData','var')
-            error('File %s does NOT contain a variable called overlayData.',pialOverlay);
+    if  ~isempty(pialOverlay)
+        [pathstr, name, ext]=fileparts(pialOverlay);
+        if strcmpi(ext,'.mgh')
+            % FreeSurfer formatted file
+            mgh = MRIread(pialOverlay);
+            overlayData=mgh.vol;
+        else
+            % mat file that needs to contain an mgh variable
+            if ~exist(pialOverlay,'file')
+                error('File %s not found.',pialOverlay);
+            end
+            load(pialOverlay,'overlayData');
+            if ~exist('overlayData','var')
+                error('File %s does NOT contain a variable called overlayData.',pialOverlay);
+            end
         end
     end
-    olayDataVec=overlayData;
-    [overlayData, oLayLimits, olayCmapName]=vals2Colormap(olayDataVec,olayColorScale);
-    olayCbarMin=oLayLimits(1);
-    olayCbarMax=oLayLimits(2);
-    if strcmpi(olayColorScale,'justpos')
-        maskIds=find(olayDataVec<=olayThresh);
-        overlayData(maskIds,:)=overlayDataTemp(maskIds,:); % make subthreshold values grey
-        %overlayData(maskIds,:)=repmat([.7 .7 .7],length(maskIds),1); % make subthreshold values grey
-    elseif strcmpi(olayColorScale,'justneg')
-        maskIds=find(olayDataVec>=olayThresh);
-        overlayData(maskIds,:)=overlayDataTemp(maskIds,:); % make superthreshold values grey
-        %overlayData(maskIds,:)=repmat([.7 .7 .7],length(maskIds),1); % make superthreshold values grey
-    elseif olayThresh~=0
-        maskIds=find(abs(olayDataVec)<=olayThresh);
-        overlayData(maskIds,:)=overlayDataTemp(maskIds,:); % make abs subthreshold values grey
-        %overlayData(maskIds,:)=repmat([.7 .7 .7],length(maskIds),1); % make abs subthreshold values grey
+    if isvector(overlayData)
+        %overlayData is a vector of values that needs to be converted to
+        %RGB
+        olayDataVec=overlayData;
+        [overlayData, oLayLimits, olayCmapName]=vals2Colormap(olayDataVec,olayColorScale);
+        olayCbarMin=oLayLimits(1);
+        olayCbarMax=oLayLimits(2);
+        if strcmpi(olayColorScale,'justpos')
+            maskIds=find(olayDataVec<=olayThresh);
+            overlayData(maskIds,:)=overlayDataTemp(maskIds,:); % make subthreshold values grey
+            %overlayData(maskIds,:)=repmat([.7 .7 .7],length(maskIds),1); % make subthreshold values grey
+        elseif strcmpi(olayColorScale,'justneg')
+            maskIds=find(olayDataVec>=olayThresh);
+            overlayData(maskIds,:)=overlayDataTemp(maskIds,:); % make superthreshold values grey
+            %overlayData(maskIds,:)=repmat([.7 .7 .7],length(maskIds),1); % make superthreshold values grey
+        elseif olayThresh~=0
+            maskIds=find(abs(olayDataVec)<=olayThresh);
+            overlayData(maskIds,:)=overlayDataTemp(maskIds,:); % make abs subthreshold values grey
+            %overlayData(maskIds,:)=repmat([.7 .7 .7],length(maskIds),1); % make abs subthreshold values grey
+        end
+        clear olayDataVec
     end
-    clear olayDataVec
 else
     overlayData=overlayDataTemp;
 end
