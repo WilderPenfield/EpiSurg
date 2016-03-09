@@ -1,2 +1,5 @@
 iELVis/EXAMPLE_NII_FILES
 *.m~
+*.dat
+*.dat.*
+*.mgh
