@@ -265,6 +265,14 @@
 % cfg.title='PT001: Stimulus Correlations';
 % cfg_out=plotPialSurf('PT001',cfg);
 %
+% % Overlay fMRI statistical map from FreeSurfer mgh file
+% cfg=[];
+% cfg.view='lomni';
+% cfg.figId=2;
+% cfg.olayUnits='z';
+% cfg.pialOverlay='handMotorLH.mgh';
+% cfgOut=plotPialSurf('PT001',cfg);
+%
 %
 %  Authors:
 %   David M. Groppe, Stephan Bickel, Pierre Mégevand, Andrew Dykstra
@@ -444,64 +452,67 @@ if strcmpi(surfType,'inflated')
 end
 
 global overlayData elecCbarMin elecCbarMax olayCbarMin olayCbarMax; % Needed for ?omni plots
-if isempty(overlayData)
-    if isempty(pialOverlay)
-        % No neuroimaging overlay
-        if strcmp(surfType,'inflated')
-            % Color gyri and sulci different shades of grey
-            if side == 'r'
-                curv = read_curv([surfacefolder 'rh.curv']);
-            else
-                curv = read_curv([surfacefolder 'lh.curv']);
-            end
-            overlayData=zeros(length(curv),3);
-            pcurvIds=find(curv>=0);
-            overlayData(pcurvIds,:)=repmat([1 1 1]*.3,length(pcurvIds),1);
-            ncurvIds=find(curv<0);
-            overlayData(ncurvIds,:)=repmat([1 1 1]*.7,length(ncurvIds),1);
-        else
-            overlayData=[.7 .7 .7]; % make it all grey
-        end
+
+% Initialize pial surface coloration
+if strcmp(surfType,'inflated')
+    % Color gyri and sulci different shades of grey
+    if side == 'r'
+        curv = read_curv([surfacefolder 'rh.curv']);
     else
-        % Pial Surface Overlay (e.g., fMRI statistical maps)
-        if isempty(olayCbar)
-            olayCbar='y';
-        else
-            olayCbar='n';
+        curv = read_curv([surfacefolder 'lh.curv']);
+    end
+    overlayDataTemp=zeros(length(curv),3);
+    pcurvIds=find(curv>=0);
+    overlayDataTemp(pcurvIds,:)=repmat([1 1 1]*.3,length(pcurvIds),1);
+    ncurvIds=find(curv<0);
+    overlayDataTemp(ncurvIds,:)=repmat([1 1 1]*.7,length(ncurvIds),1);
+else
+    overlayDataTemp=[.7 .7 .7]; % make it all grey
+end
+
+if ~isempty(overlayData) || ~isempty(pialOverlay)
+    % Pial Surface Overlay (e.g., fMRI statistical maps)
+    [pathstr, name, ext]=fileparts(pialOverlay);
+    if strcmpi(ext,'.mgh')
+        % FreeSurfer formatted file
+        mgh = MRIread(pialOverlay);
+        overlayData=mgh.vol;
+    else
+        % mat file that needs to contain an mgh variable
+        if ~exist(pialOverlay,'file')
+            error('File %s not found.',pialOverlay);
         end
-        
-        [pathstr, name, ext]=fileparts(pialOverlay);
-        if strcmpi(ext,'.mgh')
-            % FreeSurfer formatted file
-            mgh = MRIread(pialOverlay);
-            overlayData=mgh.vol;
-        else
-            % mat file that needs to contain an mgh variable
-            if ~exist(pialOverlay,'file')
-               error('File %s not found.',pialOverlay); 
-            end
-            load(pialOverlay,'overlayData');
-            if ~exist('overlayData','var')
-                error('File %s does NOT contain a variable called overlayData.',pialOverlay);
-            end
-        end
-        olayDataVec=overlayData;
-        [overlayData, oLayLimits, olayCmapName]=vals2Colormap(olayDataVec,olayColorScale);
-        olayCbarMin=oLayLimits(1);
-        olayCbarMax=oLayLimits(2);
-        if strcmpi(olayColorScale,'justpos')
-            maskIds=find(olayDataVec<=olayThresh);
-            overlayData(maskIds,:)=repmat([.7 .7 .7],length(maskIds),1); % make subthreshold values grey
-        elseif strcmpi(olayColorScale,'justneg')
-            maskIds=find(olayDataVec>=olayThresh);
-            overlayData(maskIds,:)=repmat([.7 .7 .7],length(maskIds),1); % make superthreshold values grey
+        load(pialOverlay,'overlayData');
+        if ~exist('overlayData','var')
+            error('File %s does NOT contain a variable called overlayData.',pialOverlay);
         end
     end
+    olayDataVec=overlayData;
+    [overlayData, oLayLimits, olayCmapName]=vals2Colormap(olayDataVec,olayColorScale);
+    olayCbarMin=oLayLimits(1);
+    olayCbarMax=oLayLimits(2);
+    if strcmpi(olayColorScale,'justpos')
+        maskIds=find(olayDataVec<=olayThresh);
+        overlayData(maskIds,:)=overlayDataTemp(maskIds,:); % make subthreshold values grey
+        %overlayData(maskIds,:)=repmat([.7 .7 .7],length(maskIds),1); % make subthreshold values grey
+    elseif strcmpi(olayColorScale,'justneg')
+        maskIds=find(olayDataVec>=olayThresh);
+        overlayData(maskIds,:)=overlayDataTemp(maskIds,:); % make superthreshold values grey
+        %overlayData(maskIds,:)=repmat([.7 .7 .7],length(maskIds),1); % make superthreshold values grey
+    elseif olayThresh~=0
+        maskIds=find(abs(olayDataVec)<=olayThresh);
+        overlayData(maskIds,:)=overlayDataTemp(maskIds,:); % make abs subthreshold values grey
+        %overlayData(maskIds,:)=repmat([.7 .7 .7],length(maskIds),1); % make abs subthreshold values grey
+    end
+    clear olayDataVec
+else
+    overlayData=overlayDataTemp;
 end
+clear overlayDataTemp
 
 
 %% READ SURFACE
-global cort %speeds up omni a tiny bit ??
+global cort %speeds up omni a tiny bit
 if isempty(cort)
     if side == 'r'
         [cort.vert cort.tri]=read_surf(fullfile(surfacefolder,['rh.' surfType]));
@@ -680,7 +691,7 @@ else
                 cfg_pvox2inf.fsurfSubDir=fsDir;
                 cfg_pvox2inf.elecCoord=elecCoord(showElecIds,:);
                 cfg_pvox2inf.elecNames=color_elecnames;
-                RAS_coor=pial2InfBrain(fsSub,cfg_pvox2inf); % ?? make sure this code works
+                RAS_coor=pial2InfBrain(fsSub,cfg_pvox2inf); 
             else
                 RAS_coor=RAS_coor(showElecIds,:);
             end
@@ -975,49 +986,43 @@ hElecCbar=[]; % needs to be declared for cfgOut even if colorbar not drawn
 hOlayCbar=[]; % needs to be declared for cfgOut even if colorbar not drawn
 if universalYes(elecCbar) && universalYes(olayCbar)
     % Plot both electrode AND olay colorbar
-    % ??
+    if isempty(elecCbarMin) || isempty(elecCbarMax)
+        fprintf('elecCbarMin or elecCbarMax are empty. Cannot draw colorbar.\n');
+    else
+        pos=[0.9158 0.1100 0.0310 0.8150];
+        cbarFontSize=12;
+        cbarDGplus(pos,[elecCbarMin elecCbarMax],elecCmapName,5,elecUnits,'top',cbarFontSize);
+    end
     
+    pos=[0.1 0.05 0.8150 0.0310];
+    cbarDGplus(pos,[olayCbarMin olayCbarMax],olayCmapName,5,olayUnits,'top',cbarFontSize);
 elseif universalYes(elecCbar)
     % Plot electrode colorbar only
     if isempty(elecCbarMin) || isempty(elecCbarMax)
         fprintf('elecCbarMin or elecCbarMax are empty. Cannot draw colorbar.\n');
     else
-        nColors=64; % assumed # of unique colormap colors
-        %colormap(elecCmapName);
-        hElecCbar=cbarDG('vert',[1:nColors],[elecCbarMin elecCbarMax],5,elecCmapName);
-        
-        % Move colorbar closer to brain a bit, this may not be necessary
-        % depending on your version of MATLAB
-        cbarPos=get(hElecCbar,'position');
-        set(hElecCbar,'position',[cbarPos(1)*.99 cbarPos(2:4)]);
+        % Plot electrode colorbar only
+        pos=[0.9158 0.1100 0.0310 0.8150];
+        cbarDGplus(pos,[elecCbarMin elecCbarMax],elecCmapName,5,elecUnits);
         
         if isequal(get(hFig,'color'),[0 0 0]);
             %If background of figure is black, make colorbar text white
             set(hElecCbar,'xcolor','w'); % fix so that box isn't white? ??
             set(hElecCbar,'ycolor','w');
         end
-        if ~isempty(elecUnits)
-            hTitle=title(elecUnits); % ?? change font size?
-        end
     end
 elseif universalYes(olayCbar)
     % Plot pial surface overlay colorbar only
-    nColors=64; % assumed # of unique colormap colors
-    hOlayCbar=cbarDG('vert',[1:nColors],[olayCbarMin olayCbarMax],5,olayCmapName);
-    
-    % Move colorbar closer to brain a bit, this may not be necessary
-    % depending on your version of MATLAB
-    cbarPos=get(hOlayCbar,'position');
-    set(hOlayCbar,'position',[cbarPos(1)*.99 cbarPos(2:4)]);
+    pos=[0.9158 0.1100 0.0310 0.8150];
+    cbarDGplus(pos,[olayCbarMin olayCbarMax],olayCmapName,5,olayUnits);
+
     if isequal(get(hFig,'color'),[0 0 0]);
         %If background of figure is black, make colorbar text white
         set(hOlayCbar,'xcolor','w'); % fix so that box isn't white? ??
         set(hOlayCbar,'ycolor','w');
     end
-    if ~isempty(olayUnits)
-        hTitle=title(olayUnits); % ?? change font size?
-    end
 end
+
 
 %% COLLECT CONFIG OUTPUT
 cfgOut.subject=fsSub;
@@ -1113,7 +1118,7 @@ else
     elecUsedLimits=[];
 end
 
-%% Optional pial overlay color bar variables
+% Optional pial overlay color bar variables
 olayCmapName=[];
 olayUsedLimits=[];
 if ~isempty(pialOverlay),
@@ -1276,8 +1281,7 @@ for h=1:2,
         end
         sub_cfg_out=plotPialSurf(fsSub,sub_cfg);
         
-        % Get electrode colormap limits ?? fix this so that limits are
-        % derived before visualization
+        % Get electrode colormap limits
         if isempty(elecUsedLimits)
             if isfield(sub_cfg_out,'elecCbarLimits')
                 elecUsedLimits=sub_cfg_out.elecCbarLimits;

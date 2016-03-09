@@ -1,5 +1,5 @@
-function hCbar = cbarDGplus(pos,limits,cmapName,nTick,units,unitLocation)
-%function hCbar = cbarDGplus(pos,limits,cmapName,nTick,units)
+function hCbar = cbarDGplus(pos,limits,cmapName,nTick,units,unitLocation,fontSize)
+%function hCbar = cbarDGplus(pos,limits,cmapName,nTick,units,fontSize)
 %
 % Adds a colorbar to a figure
 %
@@ -37,6 +37,10 @@ elseif ~strcmpi(unitLocation,'top') && ~strcmpi(unitLocation,'right')
    error('unitLocation argument needs to be ''top'' or ''right''.'); 
 end
 
+if nargin<7,
+   fontSize=12; 
+end
+
 % Colorbar for electrodes
 hCbar=axes('position',pos);
 if isempty(cmapName)
@@ -51,11 +55,11 @@ cbarDG(hCbar,1:n_colors,limits,nTick,cmapName);
 if strcmpi(unitLocation,'top')
     if ~isempty(units)
         ht=title(units);
-        set(ht,'fontsize',12);
+        set(ht,'fontsize',fontSize);
     end
 else
     ht=ylabel(units);
-    set(ht,'fontsize',12,'rotation',0,'VerticalAlignment','middle', ...
+    set(ht,'fontsize',fontSize,'rotation',0,'VerticalAlignment','middle', ...
         'HorizontalAlignment','left');
 end
 ticklabels=cell(1,nTick);
