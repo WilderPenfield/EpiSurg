@@ -152,28 +152,28 @@
 %                                   hem: 'r'
 %
 %    Neuroimaging Options:
-%     niThresh             -Functional data with an absolute value less
+%     pialOverlay          -Filename or cell array of filenames of
+%                           functional data to plot.  If plotting both 
+%                           hemispheres, use a cell array with the left hem
+%                           filename as the 1st element and the right as
+%                           the 2nd element. Be sure to include file paths. 
+%                           {default: not used}
+%     olayColorScale       -'absmax', 'minmax', 'justpos', 'justneg',
+%                           or numeric vector (i.e., [minval maxval]).  The 
+%                           limits that define the overlay data color scale. 
+%                           {default: 'absmax'}
+%     olayThresh           -Overlay data with an absolute value less
 %                           than this threshold will not be shown (when
-%                           showing positive and negative stat values). If
-%                           colorscale is 'justpos' then only values
-%                           greater than zthresh will be shown. If
-%                           colorscale is 'justneg' then only values less
-%                           than zthresh will be shown. {default: not used}
-%     niFname              -Filename or cell array of filenames of
-%                           functional data to plot.  If multiple filenames
-%                           given, the average of the filenames will be shown.
-%                           Be sure to include file paths. {default: not
-%                           used}
-%     niColorScale           -'absmax','minmax','nominal', 'justpos', 'justneg',
-%                           or numeric vector [minval maxval].  The limits
-%                           that define the fMRI data color scale. 'nominal'
-%                           is for nominal cortical categories (only 73
-%                           categories can be handled) {default: 'absmax'}.
-%     niUnits                -A string or []. The title of the fMRI colorbar
+%                           showing positive and negative values). If
+%                           olayColorScale is 'justpos' then only values
+%                           greater than olayThresh will be shown. If
+%                           olayColorScale is 'justneg' then only values less
+%                           than olayThresh will be shown. {default: not used}
+%     olayUnits            -A string or []. The title of the overlay colorbar
 %                           (e.g., 'z-score'). If empty, not title is drawn.
 %                           {default: []}
-%     niCbar                -'y' or 'n': Plot colorbar next to brain. {default:
-%                           'y' if funcfname argument specified, 'n' otherwise}
+%     olayCbar             -'y' or 'n': Plot colorbar next to brain. {default:
+%                           'y' if pialOverlay argument specified, 'n' otherwise}
 %
 %
 %    Other Options:
@@ -265,6 +265,14 @@
 % cfg.title='PT001: Stimulus Correlations';
 % cfg_out=plotPialSurf('PT001',cfg);
 %
+% % Overlay fMRI statistical map from FreeSurfer mgh file
+% cfg=[];
+% cfg.view='lomni';
+% cfg.figId=2;
+% cfg.olayUnits='z';
+% cfg.pialOverlay='handMotorLH.mgh';
+% cfgOut=plotPialSurf('PT001',cfg);
+%
 %
 %  Authors:
 %   David M. Groppe, Stephan Bickel, Pierre Mégevand, Andrew Dykstra
@@ -319,8 +327,6 @@ if ~isfield(cfg, 'elecCoord'),      elecCoord= 'yes';      else  elecCoord = cfg
 if ~isfield(cfg, 'elecColors'),     elecColors= [];        else  elecColors = cfg.elecColors;        end
 if ~isfield(cfg, 'elecColorScale'), elecColorScale='absmax';   else elecColorScale=cfg.elecColorScale; end
 if ~isfield(cfg, 'elecCbar'),       elecCbar=[];          else elecCbar=cfg.elecCbar; end
-if ~isfield(cfg, 'niCbar'),         niCbar=[];          else niCbar=cfg.niCbar; end
-if ~isfield(cfg, 'niFname'),        niFname=[];          else niFname=cfg.niFname; end
 if ~isfield(cfg, 'elecUnits'),      elecUnits=[];            else elecUnits=cfg.elecUnits; end
 if ~isfield(cfg, 'pullOut'),        pullOut= 1;            else  pullOut = cfg.pullOut; end
 if ~isfield(cfg, 'view'),           brainView= 'l';       else  brainView = cfg.view; end
@@ -346,15 +352,16 @@ if ~isfield(cfg, 'elecShape'), electrodeshape='marker';  else electrodeshape=cfg
 if ~isfield(cfg, 'showLabels'), showLabels=0;  else showLabels=universalYes(cfg.showLabels); end
 if ~isfield(cfg, 'opaqueness'),      opaqueness=1;          else opaqueness=cfg.opaqueness; end
 if ~isfield(cfg, 'clearGlobal'),    clearGlobal=1;          else clearGlobal=cfg.clearGlobal; end
-if ~isfield(cfg, 'pialOverlay'),    pialOverlay=[];         else pialOverlay=cfg.pialOverlay; end % ??
-if ~isfield(cfg, 'olayColorScale'), olayColorScale='absmax';  else olayColorScale=cfg.olayColorScale; end % ??
-if ~isfield(cfg, 'olayThresh'), olayThresh=0;  else olayThresh=cfg.olayThresh; end % ??
-if ~isfield(cfg, 'olayCbar'),       olayCbar=[];          else olayCbar=cfg.olayCbar; end % ??
-if ~isfield(cfg, 'olayUnits'),      olayUnits=[];         else olayUnits=cfg.olayUnits; end % ??
+if ~isfield(cfg, 'pialOverlay'),    pialOverlay=[];         else pialOverlay=cfg.pialOverlay; end 
+if ~isfield(cfg, 'olayColorScale'), olayColorScale='absmax';  else olayColorScale=cfg.olayColorScale; end
+if ~isfield(cfg, 'olayThresh'), olayThresh=0;  else olayThresh=cfg.olayThresh; end 
+if ~isfield(cfg, 'olayCbar'),       olayCbar=[];          else olayCbar=cfg.olayCbar; end 
+if ~isfield(cfg, 'olayUnits'),      olayUnits=[];         else olayUnits=cfg.olayUnits; end
 
 try 
 checkCfg(cfg,'plotPialSurf.m');
-elecCmapName=[]; % ?? needed?
+elecCmapName=[]; % needed for cfgOut
+olayCmapName=[]; % needed for cfgOut
 
 if strcmpi(cfg.view,'omni')
     cfgOut=plotPialOmni(fsSub,cfg);
@@ -397,11 +404,11 @@ if isempty(elecCbar)
         elecCbar='n';
     end
 end
-if isempty(niCbar)
-    if ~isempty(niFname)
-        niCbar='y';
+if isempty(olayCbar)
+    if ~isempty(pialOverlay)
+        olayCbar='y';
     else
-        niCbar='n';
+        olayCbar='n';
     end
 end
 
@@ -445,64 +452,67 @@ if strcmpi(surfType,'inflated')
 end
 
 global overlayData elecCbarMin elecCbarMax olayCbarMin olayCbarMax; % Needed for ?omni plots
-if isempty(overlayData)
-    if isempty(pialOverlay)
-        % No neuroimaging overlay
-        if strcmp(surfType,'inflated')
-            % Color gyri and sulci different shades of grey
-            if side == 'r'
-                curv = read_curv([surfacefolder 'rh.curv']);
-            else
-                curv = read_curv([surfacefolder 'lh.curv']);
-            end
-            overlayData=zeros(length(curv),3);
-            pcurvIds=find(curv>=0);
-            overlayData(pcurvIds,:)=repmat([1 1 1]*.3,length(pcurvIds),1);
-            ncurvIds=find(curv<0);
-            overlayData(ncurvIds,:)=repmat([1 1 1]*.7,length(ncurvIds),1);
-        else
-            overlayData=[.7 .7 .7]; % make it all grey
-        end
+
+% Initialize pial surface coloration
+if strcmp(surfType,'inflated')
+    % Color gyri and sulci different shades of grey
+    if side == 'r'
+        curv = read_curv([surfacefolder 'rh.curv']);
     else
-        % Pial Surface Overlay (e.g., fMRI statistical maps)
-        if isempty(olayCbar)
-            olayCbar='y';
-        else
-            olayCbar='n';
+        curv = read_curv([surfacefolder 'lh.curv']);
+    end
+    overlayDataTemp=zeros(length(curv),3);
+    pcurvIds=find(curv>=0);
+    overlayDataTemp(pcurvIds,:)=repmat([1 1 1]*.3,length(pcurvIds),1);
+    ncurvIds=find(curv<0);
+    overlayDataTemp(ncurvIds,:)=repmat([1 1 1]*.7,length(ncurvIds),1);
+else
+    overlayDataTemp=[.7 .7 .7]; % make it all grey
+end
+
+if ~isempty(overlayData) || ~isempty(pialOverlay)
+    % Pial Surface Overlay (e.g., fMRI statistical maps)
+    [pathstr, name, ext]=fileparts(pialOverlay);
+    if strcmpi(ext,'.mgh')
+        % FreeSurfer formatted file
+        mgh = MRIread(pialOverlay);
+        overlayData=mgh.vol;
+    else
+        % mat file that needs to contain an mgh variable
+        if ~exist(pialOverlay,'file')
+            error('File %s not found.',pialOverlay);
         end
-        
-        [pathstr, name, ext]=fileparts(pialOverlay);
-        if strcmpi(ext,'.mgh')
-            % FreeSurfer formatted file
-            mgh = MRIread(pialOverlay);
-            overlayData=mgh.vol;
-        else
-            % mat file that needs to contain an mgh variable
-            if ~exist(pialOverlay,'file')
-               error('File %s not found.',pialOverlay); 
-            end
-            load(pialOverlay,'overlayData');
-            if ~exist('overlayData','var')
-                error('File %s does NOT contain a variable called overlayData.',pialOverlay);
-            end
-        end
-        olayDataVec=overlayData;
-        [overlayData, oLayLimits, olayCmapName]=vals2Colormap(olayDataVec,olayColorScale);
-        olayCbarMin=oLayLimits(1);
-        olayCbarMax=oLayLimits(2);
-        if strcmpi(olayColorScale,'justpos')
-            maskIds=find(olayDataVec<=olayThresh);
-            overlayData(maskIds,:)=repmat([.7 .7 .7],length(maskIds),1); % make subthreshold values grey
-        elseif strcmpi(olayColorScale,'justneg')
-            maskIds=find(olayDataVec>=olayThresh);
-            overlayData(maskIds,:)=repmat([.7 .7 .7],length(maskIds),1); % make superthreshold values grey
+        load(pialOverlay,'overlayData');
+        if ~exist('overlayData','var')
+            error('File %s does NOT contain a variable called overlayData.',pialOverlay);
         end
     end
+    olayDataVec=overlayData;
+    [overlayData, oLayLimits, olayCmapName]=vals2Colormap(olayDataVec,olayColorScale);
+    olayCbarMin=oLayLimits(1);
+    olayCbarMax=oLayLimits(2);
+    if strcmpi(olayColorScale,'justpos')
+        maskIds=find(olayDataVec<=olayThresh);
+        overlayData(maskIds,:)=overlayDataTemp(maskIds,:); % make subthreshold values grey
+        %overlayData(maskIds,:)=repmat([.7 .7 .7],length(maskIds),1); % make subthreshold values grey
+    elseif strcmpi(olayColorScale,'justneg')
+        maskIds=find(olayDataVec>=olayThresh);
+        overlayData(maskIds,:)=overlayDataTemp(maskIds,:); % make superthreshold values grey
+        %overlayData(maskIds,:)=repmat([.7 .7 .7],length(maskIds),1); % make superthreshold values grey
+    elseif olayThresh~=0
+        maskIds=find(abs(olayDataVec)<=olayThresh);
+        overlayData(maskIds,:)=overlayDataTemp(maskIds,:); % make abs subthreshold values grey
+        %overlayData(maskIds,:)=repmat([.7 .7 .7],length(maskIds),1); % make abs subthreshold values grey
+    end
+    clear olayDataVec
+else
+    overlayData=overlayDataTemp;
 end
+clear overlayDataTemp
 
 
 %% READ SURFACE
-global cort %speeds up omni a tiny bit ??
+global cort %speeds up omni a tiny bit
 if isempty(cort)
     if side == 'r'
         [cort.vert cort.tri]=read_surf(fullfile(surfacefolder,['rh.' surfType]));
@@ -681,7 +691,7 @@ else
                 cfg_pvox2inf.fsurfSubDir=fsDir;
                 cfg_pvox2inf.elecCoord=elecCoord(showElecIds,:);
                 cfg_pvox2inf.elecNames=color_elecnames;
-                RAS_coor=pial2InfBrain(fsSub,cfg_pvox2inf); % ?? make sure this code works
+                RAS_coor=pial2InfBrain(fsSub,cfg_pvox2inf); 
             else
                 RAS_coor=RAS_coor(showElecIds,:);
             end
@@ -853,7 +863,7 @@ else
     for j = 1:nRAS
         if ismember(lower(elecNames{j}),lower(onlyShow)),
             if ~isempty(color_elecnames)
-                [have_color id]=ismember(lower(elecNames{j}),lower(color_elecnames));
+                [have_color, id]=ismember(lower(elecNames{j}),lower(color_elecnames));
                 if ~have_color || (~isempty(badChans) && ismember(lower(elecNames{j}),lower(badChans)))
                     % We don't have data for this electrode or have
                     % been instructed to ignore it; plot it black
@@ -976,49 +986,43 @@ hElecCbar=[]; % needs to be declared for cfgOut even if colorbar not drawn
 hOlayCbar=[]; % needs to be declared for cfgOut even if colorbar not drawn
 if universalYes(elecCbar) && universalYes(olayCbar)
     % Plot both electrode AND olay colorbar
-    % ??
+    if isempty(elecCbarMin) || isempty(elecCbarMax)
+        fprintf('elecCbarMin or elecCbarMax are empty. Cannot draw colorbar.\n');
+    else
+        pos=[0.9158 0.1100 0.0310 0.8150];
+        cbarFontSize=12;
+        cbarDGplus(pos,[elecCbarMin elecCbarMax],elecCmapName,5,elecUnits,'top',cbarFontSize);
+    end
     
+    pos=[0.1 0.05 0.8150 0.0310];
+    cbarDGplus(pos,[olayCbarMin olayCbarMax],olayCmapName,5,olayUnits,'top',cbarFontSize);
 elseif universalYes(elecCbar)
     % Plot electrode colorbar only
     if isempty(elecCbarMin) || isempty(elecCbarMax)
         fprintf('elecCbarMin or elecCbarMax are empty. Cannot draw colorbar.\n');
     else
-        nColors=64; % assumed # of unique colormap colors
-        %colormap(elecCmapName);
-        hElecCbar=cbarDG('vert',[1:nColors],[elecCbarMin elecCbarMax],5,elecCmapName);
-        
-        % Move colorbar closer to brain a bit, this may not be necessary
-        % depending on your version of MATLAB
-        cbarPos=get(hElecCbar,'position');
-        set(hElecCbar,'position',[cbarPos(1)*.99 cbarPos(2:4)]);
+        % Plot electrode colorbar only
+        pos=[0.9158 0.1100 0.0310 0.8150];
+        cbarDGplus(pos,[elecCbarMin elecCbarMax],elecCmapName,5,elecUnits);
         
         if isequal(get(hFig,'color'),[0 0 0]);
             %If background of figure is black, make colorbar text white
             set(hElecCbar,'xcolor','w'); % fix so that box isn't white? ??
             set(hElecCbar,'ycolor','w');
         end
-        if ~isempty(elecUnits)
-            hTitle=title(elecUnits); % ?? change font size?
-        end
     end
 elseif universalYes(olayCbar)
     % Plot pial surface overlay colorbar only
-    nColors=64; % assumed # of unique colormap colors
-    hOlayCbar=cbarDG('vert',[1:nColors],[olayCbarMin olayCbarMax],5,olayCmapName);
-    
-    % Move colorbar closer to brain a bit, this may not be necessary
-    % depending on your version of MATLAB
-    cbarPos=get(hOlayCbar,'position');
-    set(hOlayCbar,'position',[cbarPos(1)*.99 cbarPos(2:4)]);
+    pos=[0.9158 0.1100 0.0310 0.8150];
+    cbarDGplus(pos,[olayCbarMin olayCbarMax],olayCmapName,5,olayUnits);
+
     if isequal(get(hFig,'color'),[0 0 0]);
         %If background of figure is black, make colorbar text white
         set(hOlayCbar,'xcolor','w'); % fix so that box isn't white? ??
         set(hOlayCbar,'ycolor','w');
     end
-    if ~isempty(olayUnits)
-        hTitle=title(olayUnits); % ?? change font size?
-    end
 end
+
 
 %% COLLECT CONFIG OUTPUT
 cfgOut.subject=fsSub;
@@ -1079,34 +1083,21 @@ end
 function sub_cfg_out=plotPialOmni(fsSub,cfg)
 
 if ~isfield(cfg, 'figId'),         hFig=[];            else  hFig=cfg.figId; end
-if ~isfield(cfg, 'zthresh'),       zthresh=[];          else  zthresh = cfg.zthresh; end
+if ~isfield(cfg, 'olayThresh'),       olayThresh=[];          else  olayThresh = cfg.olayThresh; end
 if ~isfield(cfg, 'figId'),         hFig=[];              else  hFig=cfg.figId; end
 if ~isfield(cfg, 'fsurfSubDir'),   fsDir=[];             else fsDir=cfg.fsurfSubDir; end
-if ~isfield(cfg, 'elecCoord'),      elecCoord= 'yes';      else  elecCoord = cfg.elecCoord;       end
-if ~isfield(cfg, 'elecSize'),       elecSize = 8;          else  elecSize = cfg.elecSize;      end
-if ~isfield(cfg, 'elecColors'),     elecColors= [];        else  elecColors = cfg.elecColors;        end
-if ~isfield(cfg, 'elecColorScale'),   elecColorScale=[];   else elecColorScale=cfg.elecColorScale; end
-if ~isfield(cfg, 'olayColorScale'),   olayColorScale=[];   else olayColorScale=cfg.olayColorScale; end
+if ~isfield(cfg, 'elecCoord'),      elecCoord='yes';      else  elecCoord = cfg.elecCoord;       end
+if ~isfield(cfg, 'elecSize'),       elecSize=8;          else  elecSize = cfg.elecSize;      end
+if ~isfield(cfg, 'elecColors'),     elecColors=[];        else  elecColors = cfg.elecColors;        end
+if ~isfield(cfg, 'elecColorScale'),   elecColorScale='absmax';   else elecColorScale=cfg.elecColorScale; end
+if ~isfield(cfg, 'olayColorScale'),   olayColorScale='absmax';   else olayColorScale=cfg.olayColorScale; end
 if ~isfield(cfg, 'elecUnits'),     elecUnits=[];   else elecUnits=cfg.elecUnits; end
 if ~isfield(cfg, 'olayUnits'),      olayUnits=[];         else olayUnits=cfg.olayUnits; end 
 if ~isfield(cfg, 'showLabels'),         showLabels='y';            else  showLabels=cfg.showLabels; end
 if ~isfield(cfg, 'elecCbar'),     elecCbar=[];   else elecCbar=cfg.elecCbar; end
-if ~isfield(cfg, 'elecCbar'),     olayCbar=[];   else elecCbar=cfg.olayCbar; end
+if ~isfield(cfg, 'olayCbar'),     olayCbar=[];   else elecCbar=cfg.olayCbar; end
 if ~isfield(cfg, 'verbLevel'),     verbLevel=0;        else  verbLevel = cfg.verbLevel;        end
 if ~isfield(cfg, 'pialOverlay'),    pialOverlay=[];        else pialOverlay=cfg.pialOverlay; end 
-
-if ~isempty(elecColors),
-    if isempty(elecCbar)
-        elecCbar='y';
-    end
-end
-elecCmapName=[];
-if ~isempty(pialOverlay),
-    if isempty(olayCbar)
-        olayCbar='y';
-    end
-end
-olayCmapName=[];
 
 if isempty(fsDir)
     fsDir=getFsurfSubDir();
@@ -1114,6 +1105,72 @@ end
 
 clear global elecCbarMin elecCbarMax olayCbarMin olayCbarMax cort;
 
+% Optional electrode color bar variables
+if ~isempty(elecColors),
+    if isempty(elecCbar)
+        elecCbar='y';
+    end
+end
+elecCmapName=[];
+if isnumeric(elecColorScale)
+    elecUsedLimits=elecColorScale;
+else
+    elecUsedLimits=[];
+end
+
+% Optional pial overlay color bar variables
+olayCmapName=[];
+olayUsedLimits=[];
+if ~isempty(pialOverlay),
+    if isempty(olayCbar)
+        olayCbar='y';
+    end
+    if length(pialOverlay)~=2
+        error('When you use the "omni" view option and "pialOverlay," pialOverlay needs two filenanes (cfg.pialOverlay{1}=left hem, cfg.pialOverlay{2}=right hem).');
+    end
+    % Load surf files to get color scale limits
+    for a=1:2,
+        if ~exist(pialOverlay{a},'file')
+            error('File not found: %s',pialOverlay{a});
+        end
+        dot_id=find(pialOverlay{a}=='.');
+        extnsn=pialOverlay{a}(dot_id+1:end);
+        if strcmpi(extnsn,'mat')
+            load(pialOverlay{a});
+        else
+            mgh = MRIread(pialOverlay{a});
+        end
+        switch lower(olayColorScale)
+            case 'absmax'
+                abs_mx(a)=max(abs(mgh.vol));
+            case 'justpos'
+                func_mx(a)=max(mgh.vol);
+                olayCmapName='autumn';
+            case 'justneg'
+                func_mn(a)=min(mgh.vol);
+                olayCmapName='winter';
+            case 'minmax'
+                func_mn(a)=min(mgh.vol);
+                func_mx(a)=max(mgh.vol);
+            otherwise
+                %'nominal',
+                error('Invalid value of cfg.olayColorScale');
+        end
+    end
+        
+    switch lower(olayColorScale)
+        case 'absmax'
+            olayUsedLimits=[-1 1]*max(abs_mx);
+        case 'justpos'
+            olayUsedLimits=[olayThresh max(func_mx)];
+        case 'justneg'
+            olayUsedLimits=[min(func_mn) olayThresh];
+        case 'minmax'
+            olayUsedLimits=[min(func_mn) max(func_mx)];
+    end
+end
+
+% Create figure
 if isempty(hFig),
     hFig=figure; clf;
 else
@@ -1121,7 +1178,7 @@ else
 end
 set(hFig,'MenuBar','none','position',[100 190 1000 600],'paperpositionmode','auto');
 
-%% Figure out which hemisphere has electrodes
+% Figure out which hemisphere has electrodes
 if isnumeric(elecCoord),
     leftCoverage=sum(elecCoord(:,4))>0;
     rightCoverage=sum(~elecCoord(:,4))>0;
@@ -1133,25 +1190,12 @@ else
     rightCoverage=~isempty(findStrInCell('R',elecInfo(:,3)));
 end
 
-%%
-if isnumeric(elecColorScale)
-    elecUsedLimits=elecColorScale;
-else
-    elecUsedLimits=[];
-end
-if isnumeric(olayColorScale)
-    olayUsedLimits=olayColorScale;
-else
-    olayUsedLimits=[];
-end
-
 % Loop over hemispheres
 for h=1:2,
-    for v=1:6, %will run 1-6
+    for v=1:6,
         ax_loc=[0 0 0 0];
         if h==1,
             bview='l';
-            %hAx(1)=axes('position',[.03 .01 .45 .95]);
         else
             bview='r';
         end
@@ -1180,7 +1224,7 @@ for h=1:2,
             case 6 %LH inferior
                 ax_loc=[1-.455-.2 .14 .2 .4];
                 
-            case 7 %%%%% RH lateral
+            case 7 %RH lateral
                 ax_loc=[1-.4 .67 .4 .3];
             case 8 %RH medial
                 ax_loc=[1-.4 .34 .4 .3];
@@ -1223,12 +1267,15 @@ for h=1:2,
         sub_cfg.figId=hFig;
         sub_cfg.axis=hAx;
         sub_cfg.verbLevel=verbLevel;
-        
+        if ~isempty(pialOverlay),
+            sub_cfg.pialOverlay=pialOverlay{h};
+        end
         sub_cfg.clearFig='n';
         sub_cfg.elecCbar='n';
         sub_cfg.olayCbar='n';
+        sub_cfg.olayColorScale=olayUsedLimits;
         if v==6
-            sub_cfg.clearGlobal=1; %last view for this hem, clear overlayData from global memory
+            sub_cfg.clearGlobal=1; %last view for this hem, clear overlay data from global memory
         else
             sub_cfg.clearGlobal=0;
         end
@@ -1249,72 +1296,27 @@ for h=1:2,
                 end
             end
         end
-        if isempty(olayUsedLimits)
-            if isfield(sub_cfg_out,'olayCbarLimits')
-                olayUsedLimits=sub_cfg_out.olayCbarLimits;
-            end
-        else
-            if isfield(sub_cfg_out,'olayCbarLimits') && ~isempty(sub_cfg_out.olayCbarLimits)
-                if olayUsedLimits(2)<sub_cfg_out.olayCbarLimits(2)
-                    olayUsedLimits(2)=sub_cfg_out.olayCbarLimits(2);
-                end
-                if olayUsedLimits(1)>sub_cfg_out.olayCbarLimits(1)
-                    olayUsedLimits(1)=sub_cfg_out.olayCbarLimits(1);
-                end
-            end
-        end
         
     end
 end
 
 %% DRAW COLORBAR(S)
 if universalYes(elecCbar) && universalYes(olayCbar),
-    % Draw colorbar for electrodes AND pial surface overlay
-    
+    % Colorbar for electrodes
+    pos=[.4 .09 .2 .01];
+    cbarDGplus(pos,elecUsedLimits,elecCmapName,5,elecUnits,'right');
+
+    % Colorbar for pial surface overlay (e.g., neuroimaging)
+    pos=[.4 .04 .2 .01];
+    cbarDGplus(pos,olayUsedLimits,olayCmapName,5,olayUnits,'right');
 elseif universalYes(elecCbar),
     % Colorbar for electrodes
-    hElecCbar=axes('position',[.4 .06 .2 .03]);
-    if isempty(sub_cfg_out.elecCmapName)
-        colormap('parula');
-    else
-        colormap(sub_cfg_out.elecCmapName);
-    end
-    map=colormap;
-    n_colors=size(map,1);
-    n_tick=5;
-    cbarDG(hElecCbar,[1:n_colors],elecUsedLimits,n_tick,sub_cfg_out.elecCmapName);
-    if ~isempty(elecUnits)
-        ht=title(elecUnits);
-        set(ht,'fontsize',12);
-    end
-    ticklabels=cell(1,n_tick);
-    ticks=linspace(elecUsedLimits(1),elecUsedLimits(2),n_tick);
-    for a=1:n_tick,
-        ticklabels{a}=num2str(ticks(a),3);
-    end
-    set(hElecCbar,'yticklabel',ticklabels);
+    pos=[.4 .06 .2 .03];
+    cbarDGplus(pos,elecUsedLimits,elecCmapName,5,elecUnits);
 elseif universalYes(olayCbar)
     % Colorbar for pial surface overlay (e.g., neuroimaging)
-    hOlayCbar=axes('position',[.4 .06 .2 .03]);
-    if isempty(olayCmapName)
-        colormap('parula');
-    else
-        colormap(olayCmapName);
-    end
-    map=colormap;
-    n_colors=size(map,1);
-    n_tick=5; 
-    cbarDG(hOlayCbar,[1:n_colors],olayUsedLimits,n_tick,sub_cfg_out.olayCmapName);
-    if ~isempty(olayUnits)
-        ht=title(olayUnits);
-        set(ht,'fontsize',12);
-    end
-    ticklabels=cell(1,n_tick);
-    ticks=linspace(olayUsedLimits(1),olayUsedLimits(2),n_tick);
-    for a=1:n_tick,
-        ticklabels{a}=num2str(ticks(a),3);
-    end
-    set(hOlayCbar,'yticklabel',ticklabels);
+    pos=[.4 .06 .2 .03];
+    cbarDGplus(pos,olayUsedLimits,olayCmapName,5,olayUnits);
 end
 
 % Title
@@ -1326,6 +1328,7 @@ if isfield(cfg,'title')
     end
 end
 drawnow;
+
 
 %% subfunction plotPialHemi
 function sub_cfg_out=plotPialHemi(fsSub,cfg)
@@ -1430,13 +1433,13 @@ for v=1:6, %will run 1-6
     
     % Get electrode colormap limits
     if v==1
-        if isfield(sub_cfg_out,'elecCbarLimits')
+        if universalYes(elecCbar)
             elecUsedLimits=sub_cfg_out.elecCbarLimits;
             elecCmapName=sub_cfg_out.elecCmapName;
         end
     end
     if v==1
-        if isfield(sub_cfg_out,'olayCbarLimits')
+        if universalYes(olayCbar)
             olayUsedLimits=sub_cfg_out.olayCbarLimits;
             olayCmapName=sub_cfg_out.olayCmapName;
         end
@@ -1445,53 +1448,22 @@ end
 
 
 %% DRAW COLORBAR(S)
-if universalYes(elecCbar) && universalYes(olayCbar),
-    % Draw colorbar for electrodes AND pial surface overlay
+if universalYes(elecCbar) && universalYes(olayCbar),    
+    % Colorbar for electrodes
+    pos=[.88 .1 .01 .8];
+    cbarDGplus(pos,elecUsedLimits,elecCmapName,5,elecUnits);
     
+    % Colorbar for pial surface overlay (e.g., neuroimaging)
+    pos=[.94 .1 .01 .8];
+    cbarDGplus(pos,olayUsedLimits,olayCmapName,5,olayUnits);
 elseif universalYes(elecCbar),
     % Colorbar for electrodes
-    hElecCbar=axes('position',[.90 .1 .03 .8]);
-    if isempty(elecCmapName)
-        colormap('parula');
-    else
-        colormap(elecCmapName);
-    end
-    map=colormap;
-    n_colors=size(map,1);
-    n_tick=5;
-    cbarDG(hElecCbar,[1:n_colors],elecUsedLimits,n_tick,elecCmapName);
-    if ~isempty(elecUnits)
-        ht=title(elecUnits);
-        set(ht,'fontsize',12);
-    end
-    ticklabels=cell(1,n_tick);
-    ticks=linspace(elecUsedLimits(1),elecUsedLimits(2),n_tick);
-    for a=1:n_tick,
-        ticklabels{a}=num2str(ticks(a),3);
-    end
-    set(hElecCbar,'yticklabel',ticklabels);
+    pos=[.90 .1 .03 .8];
+    cbarDGplus(pos,elecUsedLimits,elecCmapName,5,elecUnits);
 elseif universalYes(olayCbar)
     % Colorbar for pial surface overlay (e.g., neuroimaging)
-    hOlayCbar=axes('position',[.90 .1 .03 .8]);
-    if isempty(olayCmapName)
-        colormap('parula');
-    else
-        colormap(olayCmapName);
-    end
-    map=colormap;
-    n_colors=size(map,1);
-    n_tick=5; 
-    cbarDG(hOlayCbar,[1:n_colors],olayUsedLimits,n_tick,olayCmapName);
-    if ~isempty(olayUnits)
-        ht=title(olayUnits);
-        set(ht,'fontsize',12);
-    end
-    ticklabels=cell(1,n_tick);
-    ticks=linspace(olayUsedLimits(1),olayUsedLimits(2),n_tick);
-    for a=1:n_tick,
-        ticklabels{a}=num2str(ticks(a),3);
-    end
-    set(hOlayCbar,'yticklabel',ticklabels);
+    pos=[.90 .1 .03 .8];
+    cbarDGplus(pos,olayUsedLimits,olayCmapName,5,olayUnits);
 end
 
 % Title

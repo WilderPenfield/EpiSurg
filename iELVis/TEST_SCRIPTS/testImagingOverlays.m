@@ -1,66 +1,29 @@
-%% Just negative
-cfg=[];
-cfg.view='l';
-cfg.figId=1;
-cfg.pialOverlay='/Applications/freesurfer/subjects/DoBr/fMRI/session_090711/RHandMotor/RHandMotor.feat/reg_surf-lh-DoBr/stats/zstat2.mgh';
-cfg.olayColorScale='justneg';
-cfg.olayThresh=-1.96;
-cfgOut=plotPialSurf('DoBr',cfg);
+% This script runs the commands on this page of the wiki:
+% http://episurg.pbworks.com/w/page/105900198/Overlaying%20Neuroimaging%20Data
 
-
-%% Inflated, just postive
-cfg=[];
-cfg.view='l';
-cfg.figId=1;
-cfg.pialOverlay='/Applications/freesurfer/subjects/DoBr/fMRI/session_090711/RHandMotor/RHandMotor.feat/reg_surf-lh-DoBr/stats/zstat2.mgh';
-cfg.surfType='inflated';
-cfg.olayColorScale='justpos';
-cfg.olayThresh=1.96;
-cfgOut=plotPialSurf('DoBr',cfg);
-
-
-%% absmx
-cfg=[];
-cfg.view='l';
-cfg.figId=1;
-cfg.surfType='inflated';
-cfg.olayUnits='z';
-cfg.pialOverlay='/Applications/freesurfer/subjects/DoBr/fMRI/session_090711/RHandMotor/RHandMotor.feat/reg_surf-lh-DoBr/stats/zstat2.mgh';
-cfgOut=plotPialSurf('DoBr',cfg);
-
-
-%% absmx
-cfg=[];
-cfg.view='r';
-cfg.figId=1;
-cfg.surfType='inflated';
-cfg.olayUnits='z';
-cfg.pialOverlay='/Applications/freesurfer/subjects/DoBr/fMRI/session_090711/RHandMotor/RHandMotor.feat/reg_surf-rh-DoBr/stats/zstat2.mgh';
-cfgOut=plotPialSurf('DoBr',cfg);
-
-
-%% absmx lomni
+%%
 cfg=[];
 cfg.view='lomni';
 cfg.figId=2;
 cfg.olayUnits='z';
-cfg.pialOverlay='/Applications/freesurfer/subjects/DoBr/fMRI/session_090711/RHandMotor/RHandMotor.feat/reg_surf-lh-DoBr/stats/zstat2.mgh';
-cfgOut=plotPialSurf('DoBr',cfg);
+cfg.pialOverlay='/Users/davidgroppe/GIT/EpiSurg/iELVis/EXAMPLE_NII_FILES/handMotorLH.mgh';
+cfgOut=plotPialSurf('PT001',cfg);
+% print -f2 -djpeg fmriOlayPial
 
 
-%% absmx romni
-cfg=[];
-cfg.view='romni';
-cfg.figId=2;
-cfg.olayUnits='z';
-cfg.pialOverlay='/Applications/freesurfer/subjects/DoBr/fMRI/session_090711/RHandMotor/RHandMotor.feat/reg_surf-rh-DoBr/stats/zstat2.mgh';
-cfgOut=plotPialSurf('DoBr',cfg);
-
-%% absmx omni
+%%
 cfg=[];
 cfg.view='omni';
 cfg.figId=2;
+cfg.elecCoord='n';
+cfg.surfType='inflated';
+cfg.olayThresh=3;
 cfg.olayUnits='z';
-cfg.pialOverlay{1}='/Applications/freesurfer/subjects/DoBr/fMRI/session_090711/RHandMotor/RHandMotor.feat/reg_surf-lh-DoBr/stats/zstat2.mgh';
-cfg.pialOverlay{2}='/Applications/freesurfer/subjects/DoBr/fMRI/session_090711/RHandMotor/RHandMotor.feat/reg_surf-rh-DoBr/stats/zstat2.mgh';
-cfgOut=plotPialSurf('DoBr',cfg);
+cfg.pialOverlay{1}='/Users/davidgroppe/GIT/EpiSurg/iELVis/EXAMPLE_NII_FILES/handMotorLH.mgh';
+cfg.pialOverlay{2}='/Users/davidgroppe/GIT/EpiSurg/iELVis/EXAMPLE_NII_FILES/handMotorRH.mgh';
+cfgOut=plotPialSurf('PT001',cfg);
+%print -f2 -djpeg fmriOlayInflated
+
+
+%%
+disp('testImagingOverlays.m completed completed successfully.');

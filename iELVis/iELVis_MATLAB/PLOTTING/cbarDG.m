@@ -112,7 +112,7 @@ else
 end
 
 if nargin>2
-  if size(minmax,1) ~= 1 | size(minmax,2) ~= 2
+  if size(minmax,1) ~= 1 || size(minmax,2) ~= 2
     help cbar
     fprintf('cbar() : minmax arg must be [min,max]\n');
     return
@@ -122,7 +122,7 @@ if nargin < 4
     grad = 5;
 end;
 
-if nargin<5,
+if nargin<5 || isempty(cmapName),
     if verLessThan('matlab','8.0.1')
         map=colormap('jet');
     else
@@ -142,7 +142,7 @@ end
 % Choose colorbar position
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if (length(colors) == 1) & (colors == 0)
+if (length(colors) == 1) && (colors == 0)
   t = caxis;
 else
   t = [0 1];
