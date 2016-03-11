@@ -1,5 +1,5 @@
 function dykstraElecPjct(sub,minimizeChange)
-%function dykstraElecPjct(sub)
+%function dykstraElecPjct(sub,minimizeChange)
 %
 % Corrects intracranial electrode locations for brain shift using the
 % following method:

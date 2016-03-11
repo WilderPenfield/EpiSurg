@@ -8,7 +8,7 @@ function yangWangElecPjct(sub)
 %  using magnetic resonance imaging. NeuroImage 63(1), 157?165. 
 %  doi:10.1016/j.neuroimage.2012.06.039
 %
-% Inputs:
+% Input:
 %  sub - Freesurfer subject name (e.g., 'TWH001')
 %
 % Outputs:
