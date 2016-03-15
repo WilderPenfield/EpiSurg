@@ -70,6 +70,18 @@ fsDir=getFsurfSubDir();
 avgDir=fullfile(fsDir,'fsaverage');
 subDir=fullfile(fsDir,subj);
 
+
+if ~exist(avgDir,'dir')
+    error('Folder for fsaverage is not present in FreeSurfer subjects directory (%s). Download it from here https://osf.io/qe7pz/ and add it.', ...
+        fsDir);
+end
+if ~exist(subDir,'dir')
+    error('Folder for %s is not present in FreeSurfer subjects directory (%s).',subj,fsDir);
+end
+
+
+
+
 % Take care of electrode names, hemisphere, and type
 if isempty(elecNames)
     % Import electrode names

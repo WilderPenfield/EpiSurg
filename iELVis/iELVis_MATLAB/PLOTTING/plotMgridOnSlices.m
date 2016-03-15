@@ -26,13 +26,13 @@ function plotMgridOnSlices(fsSub,cfg)
 % Examples:
 %  %Specify mgrid file and do NOT print
 %  cfg=[];
-%  cfg.mgridFname='/Applications/freesurfer/subjects/TWH001/elec_recon/TWH001_bi.mgrid';
-%  plotMgridOnSlices('TWH001',cfg);
+%  cfg.mgridFname='/Applications/freesurfer/subjects/TWH001/elec_recon/TWH001.mgrid';
+%  plotMgridOnSlices('PT001',cfg);
 %
 %  %Use FreeSurfer file structure and print
 %  cfg=[];
 %  cfg.printFigs=1;
-%  plotMgridOnSlices('TWH011',cfg);
+%  plotMgridOnSlices('PT001',cfg);
 %
 %
 % Author: David M. Groppe
@@ -54,7 +54,7 @@ checkCfg(cfg,'plotMgridOnSlices.m');
 % FreeSurfer Subject Directory
 fsdir=getFsurfSubDir();
 
-mriFname=[fsdir '/' fsSub '/mri/brainmask.mgz'];
+mriFname=fullfile(fsdir,fsSub,'mri','brainmask.mgz');
 if ~exist(mriFname,'file')
    error('File %s not found.',mriFname); 
 end

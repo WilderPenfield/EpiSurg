@@ -365,10 +365,10 @@ checkCfg(cfg,'plotPialSurf.m');
 elecCmapName=[]; % needed for cfgOut
 olayCmapName=[]; % needed for cfgOut
 
-if strcmpi(cfg.view,'omni')
+if strcmpi(brainView,'omni')
     cfgOut=plotPialOmni(fsSub,cfg);
     return;
-elseif strcmpi(cfg.view,'lomni') || strcmpi(cfg.view,'romni')
+elseif strcmpi(brainView,'lomni') || strcmpi(brainView,'romni')
     cfgOut=plotPialHemi(fsSub,cfg);
     return;
 end
@@ -379,10 +379,11 @@ if isempty(fsDir)
 end
 
 % Folder with surface files
-surfacefolder=fullfile(fsDir,fsSub,'surf');
-if ~isempty(surfacefolder) && (surfacefolder(end)~='/')
-    surfacefolder=[surfacefolder '/'];
+subFolder=fullfile(fsDir,fsSub);
+if ~exist(subFolder,'dir')
+   error('FreeSurfer folder for %s not found.',subFolder); 
 end
+surfacefolder=fullfile(fsDir,fsSub,'surf');
 
 % Get side of brain to show
 if ischar(brainView),
@@ -442,9 +443,9 @@ end
 % gyri can be seen
 if strcmpi(surfType,'inflated')
     if side == 'r'
-        curv = read_curv([surfacefolder 'rh.curv']);
+        curv = read_curv(fullfile(surfacefolder,'rh.curv'));
     else
-        curv = read_curv([surfacefolder 'lh.curv']);
+        curv = read_curv(fullfile(surfacefolder,'lh.curv'));
     end
     curvMap=zeros(length(curv),3);
     pcurvIds=find(curv>=0);
@@ -456,9 +457,9 @@ end
 %% Initialize pial surface coloration
 % Color gyri and sulci different shades of grey
 if side == 'r'
-    curv = read_curv([surfacefolder 'rh.curv']);
+    curv = read_curv(fullfile(surfacefolder,'rh.curv'));
 else
-    curv = read_curv([surfacefolder 'lh.curv']);
+    curv = read_curv(fullfile(surfacefolder,'lh.curv'));
 end
 if strcmpi(surfType,'inflated')
     overlayDataTemp=zeros(length(curv),3);
@@ -544,19 +545,19 @@ if overlayParcellation,
         labelFolder=[labelFolder '/'];
     end
     if strcmpi(overlayParcellation,'DK')
-        annotFname=[labelFolder side 'h.aparc.annot']; %Desikan-Killiany 36 area atlas
+        annotFname=fullfile(labelFolder,[side 'h.aparc.annot']); %Desikan-Killiany 36 area atlas
         [averts,albl,actbl]=read_annotation(annotFname);
         actbl.table(1,1:3)=255*[1 1 1]*.7; %make medial wall the same shade of grey as functional plots
     elseif strcmpi(overlayParcellation,'D')
-        annotFname=[labelFolder side 'h.aparc.a2009s.annot']; %Destrieux 76 area atlas
+        annotFname=fullfile(labelFolder,[side 'h.aparc.a2009s.annot']); %Destrieux 76 area atlas
         [averts,albl,actbl]=read_annotation(annotFname);
         actbl.table(43,1:3)=255*[1 1 1]*.7; %make medial wall the same shade of grey as functional plots
     elseif strcmpi(overlayParcellation,'Y7')
         if strcmpi(fsSub,'fsaverage')
-            annotFname=[labelFolder side 'h.Yeo2011_7Networks_N1000.annot']; % Yeo et al. 2011
+            annotFname=fullfile(labelFolder,[side 'h.Yeo2011_7Networks_N1000.annot']); % Yeo et al. 2011
             [averts,albl,actbl]=read_annotation(annotFname);
         else
-            annotFname=[labelFolder side 'h_Yeo2011_7Networks_N1000.mat']; % Yeo et al. 2011
+            annotFname=fullfile(labelFolder,[side 'h_Yeo2011_7Networks_N1000.mat']); % Yeo et al. 2011
             load(annotFname);
             albl=label;
             actbl=colortable;
@@ -565,10 +566,10 @@ if overlayParcellation,
         end
     elseif strcmpi(overlayParcellation,'Y17')
         if strcmpi(fsSub,'fsaverage')
-            annotFname=[labelFolder side 'h.Yeo2011_17Networks_N1000.annot']; % Yeo et al. 2011
+            annotFname=fullfile(labelFolder,[side 'h.Yeo2011_17Networks_N1000.annot']); % Yeo et al. 2011
             [averts,albl,actbl]=read_annotation(annotFname);
         else
-            annotFname=[labelFolder side 'h_Yeo2011_17Networks_N1000.mat']; % Yeo et al. 2011
+            annotFname=fullfile(labelFolder,[side 'h_Yeo2011_17Networks_N1000.mat']); % Yeo et al. 2011
             load(annotFname);
             albl=label;
             actbl=colortable;

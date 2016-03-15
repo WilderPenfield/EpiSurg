@@ -18,9 +18,17 @@ end
 
 %% Test to make sure that PT001 is in path
 disp('Checking that PT001 folder is in FreeSurfer "subjects" directory...');
-if ~exist(fullfile(fsDir,'PT001'),'file')
+if ~exist(fullfile(fsDir,'PT001'),'dir')
    error('Folder for PT001 is not present in FreeSurfer subjects directory. Download it from here https://osf.io/afwrz/ and add it.'); 
 end
+
+
+%% Test to make sure that fsaverage is in path
+disp('Checking that fsaverage folder is in FreeSurfer "subjects" directory...');
+if ~exist(fullfile(fsDir,'fsaverage'),'dir')
+   error('Folder for fsaverage is not present in FreeSurfer subjects directory. Download it from here https://osf.io/qe7pz/ and add it.'); 
+end
+
 
 
 %% Test simplest brainshift correction
@@ -69,6 +77,11 @@ cfgOut=plotPialSurf('PT001',cfg);
 %% Test avg brain mapping
 disp('Checking mapping to average brain on demo data PT001...');
 [avgCoords, elecNames, isLeft]=pial2AvgBrain('PT001',[]);
+
+
+%% Test assigning electrodes to atlas areas
+disp('Checking mapping to electrodes to atlas areas using demo data PT001...');
+parcOut=elec2Parc('PT001','DK');
 
 
 %% 
