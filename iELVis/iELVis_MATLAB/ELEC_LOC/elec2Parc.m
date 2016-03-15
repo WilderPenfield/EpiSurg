@@ -48,15 +48,10 @@ fsDir=getFsurfSubDir();
 
 % Folder with surface files
 surfaceFolder=fullfile(fsDir,subj,'surf');
-if ~isempty(surfaceFolder) && (surfaceFolder(end)~='/')
-    surfaceFolder=[surfaceFolder '/'];
-end
 
 % Folder with cortical parcellation files
 labelFolder=fullfile(fsDir,subj,'label');
-if ~isempty(labelFolder) && (labelFolder(end)~='/')
-    labelFolder=[labelFolder '/'];
-end
+
 
 %% Import electrode locations
 % Pial coordinates
@@ -71,7 +66,7 @@ for a=1:nElec,
 end
 
 % Need to get brainmask dimensions for flipping 3rd pvox coordinate
-mriFname=[fsDir '/' subj '/mri/brainmask.mgz'];
+mriFname=fullfile(fsDir,subj,'mri','brainmask.mgz');
 if ~exist(mriFname,'file')
    error('File %s not found.',mriFname); 
 end
