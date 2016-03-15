@@ -64,18 +64,11 @@ if (strcmpi(fname((strlen(fname)-3):strlen(fname)), '.MGZ') | ...
   gzipped =  round(rand(1)*10000000 + ...
 		   sum(int16(fname))) + round(cputime);
   ind = findstr(fname, '.');
-  if strncmp(computer,'PCWIN',5)
-      % Windows machine
-      new_fname = sprintf('tmp%d.mgh', gzipped); % DG EDIT to make compatible with windows
-      %new_fname = sprintf('%s.load_mgh.%d.mgh', tempname,gzipped);  % line
-      %in newest version of FreeSurfer matlab code
-  else
-      new_fname = sprintf('/tmp/tmp%d.mgh', gzipped); % ORIGINAL LINE
-  end
+  new_fname = sprintf('/tmp/tmp%d.mgh', gzipped);
   if(strcmp(computer,'MAC') || strcmp(computer,'MACI') || strcmp(computer,'MACI64'))
-      unix(sprintf('gunzip -c %s > %s', fname, new_fname)) ;
+    unix(sprintf('gunzip -c %s > %s', fname, new_fname)) ;
   else
-      unix(sprintf('zcat %s > %s', fname, new_fname)) ;
+    unix(sprintf('zcat %s > %s', fname, new_fname)) ;
   end
   fname = new_fname ;
 else
