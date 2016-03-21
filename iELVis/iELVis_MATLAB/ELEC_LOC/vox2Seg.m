@@ -35,7 +35,7 @@ aseg=MRIread(asegFname);
 
 %% Load table
 pathstr = fileparts(which('mgrid2matlab'));
-inFile=[pathstr '/FreeSurferColorLUTnoFormat.txt'];
+inFile=fullfile(pathstr,'FreeSurferColorLUTnoFormat.txt');
 if ~exist(inFile,'file')
     error('Could not find file %s',inFile);
 end
