@@ -201,6 +201,8 @@ for hemLoop=1:2,
             hFig=figure;
             set(hFig,'position',[360 335 829 360]);
             
+            elecColors=distinguishable_colors(nHemElec,[1 1 1]*.7);
+            
             % Plot Electrodes on Avg Brain
             subplot(1,2,1);
             map=[1 1 1]*.7;
@@ -216,7 +218,7 @@ for hemLoop=1:2,
             for a=1:nHemElec,
                 h=plot3(avgCoords(a+plotCtOffset,1),avgCoords(a+plotCtOffset,2),avgCoords(a+plotCtOffset,3),'r.');
                 clickText(h,elecNames{a+plotCtOffset});
-                set(h,'markersize',20);
+                set(h,'markersize',20,'color',elecColors(a,:));
             end
             rotate3d off;
             
@@ -235,14 +237,14 @@ for hemLoop=1:2,
                 d=subVids(a+plotCtOffset);
                 h=plot3(pial.vert(d,1),pial.vert(d,2),pial.vert(d,3),'r.');
                 clickText(h,elecNames{a+plotCtOffset});
-                set(h,'markersize',20);
+                set(h,'markersize',20,'color',elecColors(a,:));
             end
             rotate3d off;
             set(gcf,'name',subj);
             
             % MEDIAL VIEW
             hFig=figure;
-            set(hFig,'position',[360 325 829 360]);
+            set(hFig,'position',[350 315 829 360]);
             
             % Plot Electrodes on Avg Brain
             subplot(1,2,1);
@@ -262,7 +264,7 @@ for hemLoop=1:2,
                 %                 clickText(h,[elecNames{a} sprintf(' %.3f %.3f %.3f',avgCoords(a,1), ...
                 %                     avgCoords(a,2),avgCoords(a,3))]);
                 clickText(h,elecNames{a+plotCtOffset});
-                set(h,'markersize',20);
+                set(h,'markersize',20,'color',elecColors(a,:));
             end
             rotate3d off;
             
@@ -281,7 +283,7 @@ for hemLoop=1:2,
                 d=subVids(a+plotCtOffset);
                 h=plot3(pial.vert(d,1),pial.vert(d,2),pial.vert(d,3),'r.');
                 clickText(h,elecNames{a+plotCtOffset});
-                set(h,'markersize',20);
+                set(h,'markersize',20,'color',elecColors(a,:));
             end
             rotate3d off;
             set(gcf,'name',subj);
