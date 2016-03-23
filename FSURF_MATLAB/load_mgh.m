@@ -72,7 +72,14 @@ if (strcmpi(fname((strlen(fname)-3):strlen(fname)), '.MGZ') | ...
   else
       new_fname = sprintf('/tmp/tmp%d.mgh', gzipped); % ORIGINAL LINE
   end
-  if(strcmp(computer,'MAC') || strcmp(computer,'MACI') || strcmp(computer,'MACI64'))
+  if strncmp(computer,'PCWIN',5) % PM edited 20160322
+      % get folder and file name
+      [foldername,fnameshort]=fileparts(fname);
+      % execute 7-Zip extract command
+      eval(['dos ''"C:\Program Files\7-Zip\7z" e "' fname '" -o"' foldername '"''']);
+      % rename unzipped file
+      movefile(fullfile(foldername,fnameshort),fullfile(foldername,new_fname));
+  elseif(strcmp(computer,'MAC') || strcmp(computer,'MACI') || strcmp(computer,'MACI64'))
       unix(sprintf('gunzip -c %s > %s', fname, new_fname)) ;
   else
       unix(sprintf('zcat %s > %s', fname, new_fname)) ;
@@ -93,7 +100,11 @@ if(frames(1) <= 0) frames = 0; end
 
 if(exist('headeronly')~=1) headeronly = 0; end
 
-fid    = fopen(fname, 'rb', 'b') ;
+if strncmp(computer,'PCWIN',5) % PM edited 20160322
+    fid=fopen(fullfile(foldername,new_fname),'rb','b');
+else
+    fid    = fopen(fname, 'rb', 'b') ;
+end
 if(fid == -1)
   fprintf('ERROR: could not open %s for reading\n',fname);
   return;
@@ -101,7 +112,13 @@ end
 v       = fread(fid, 1, 'int') ; 
 if(isempty(v))
   fprintf('ERROR: problem reading fname\n');
-  if(gzipped >=0) unix(sprintf('rm %s', fname)); end
+  if(gzipped >=0)
+      if strncmp(computer,'PCWIN',5) % PM edited 20160322
+          delete(fullfile(foldername,new_fname));
+      else
+          unix(sprintf('rm %s', fname));
+      end
+  end
 end
 ndim1   = fread(fid, 1, 'int') ; 
 ndim2   = fread(fid, 1, 'int') ; 
@@ -182,7 +199,13 @@ if(headeronly)
     end
   end
   fclose(fid);
-  if(gzipped >=0)  unix(sprintf('rm %s', fname));  end
+  if(gzipped >=0)
+      if strncmp(computer,'PCWIN',5) % PM edited 20160322
+          delete(fullfile(foldername,new_fname));
+      else
+          unix(sprintf('rm %s', fname));
+      end
+  end
   return;
 end
 
@@ -207,7 +230,13 @@ if(slices(1) <= 0 & frames(1) <= 0)
     end
   end
   fclose(fid) ;
-  if(gzipped >=0)  unix(sprintf('rm %s', fname));  end
+  if(gzipped >=0)
+      if strncmp(computer,'PCWIN',5) % PM edited 20160322
+          delete(fullfile(foldername,new_fname));
+      else
+        unix(sprintf('rm %s', fname));
+      end
+  end
   
   nread = prod(size(vol));
   if(nread ~= nv)
@@ -253,7 +282,13 @@ for frame = frames
       fprintf('ERROR: load_mgh: reading slice %d, frame %d\n',slice,frame);
       fprintf('  tried to read %d, actually read %d\n',nvslice,nread);
       fclose(fid);
-      if(gzipped >=0) unix(sprintf('rm %s', fname)); end
+      if(gzipped >=0)
+          if strncmp(computer,'PCWIN',5) % PM edited 20160322
+              delete(fullfile(foldername,new_fname));
+          else
+            unix(sprintf('rm %s', fname));
+          end
+      end
       return;
     end
 
@@ -276,6 +311,12 @@ if(~feof(fid))
 end
 
 fclose(fid) ;
-if(gzipped >=0) unix(sprintf('rm %s', fname)); end
+if(gzipped >=0)
+    if strncmp(computer,'PCWIN',5) % PM edited 20160322
+        delete(fullfile(foldername,new_fname));
+    else
+        unix(sprintf('rm %s', fname));
+    end
+end
 
 return;

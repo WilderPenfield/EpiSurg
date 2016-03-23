@@ -80,8 +80,6 @@ if ~exist(subDir,'dir')
 end
 
 
-
-
 % Take care of electrode names, hemisphere, and type
 if isempty(elecNames)
     % Import electrode names

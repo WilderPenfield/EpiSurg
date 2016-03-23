@@ -60,9 +60,20 @@ if(strcmpi(ext,'.gz'))
   gzipped =  round(rand(1)*10000000 + ...
 		   sum(int16(niftifile))) + round(cputime);
   ind = findstr(niftifile, '.');
-  new_niftifile = sprintf('/tmp/tmp%d.nii', gzipped);
+  if strncmp(computer,'PCWIN',5) % PM edited 20160322
+      new_niftifile = sprintf('tmp%d.nii', gzipped);
+  else
+      new_niftifile = sprintf('/tmp/tmp%d.nii', gzipped);
+  end
   %fprintf('Uncompressing %s to %s\n',niftifile,new_niftifile);
-  if(strcmp(computer,'MAC') || strcmp(computer,'MACI64') || strcmp(computer,'MACI'))
+  if strncmp(computer,'PCWIN',5) % PM edited 20160322
+      % get folder and file name
+      [foldername,fnameshort]=fileparts(niftifile);
+      % execute 7-Zip extract command
+      eval(['dos ''"C:\Program Files\7-Zip\7z" e "' niftifile '" -o"' foldername '"''']);
+      % rename unzipped file
+      movefile(fullfile(foldername,fnameshort),fullfile(foldername,new_niftifile));
+  elseif(strcmp(computer,'MAC') || strcmp(computer,'MACI64') || strcmp(computer,'MACI'))
     unix(sprintf('gunzip -c %s > %s', niftifile, new_niftifile));
   else
     unix(sprintf('zcat %s > %s', niftifile, new_niftifile)) ;
@@ -72,15 +83,31 @@ else
   gzipped = -1 ;
 end
 
-hdr = load_nifti_hdr(niftifile);
+if strncmp(computer,'PCWIN',5) % PM edited 20160322
+    hdr=load_nifti_hdr(fullfile(foldername,niftifile));
+else
+    hdr = load_nifti_hdr(niftifile);
+end
 if(isempty(hdr)) 
-  if(gzipped >=0) unix(sprintf('rm %s', niftifile)); end
+  if(gzipped >=0)
+      if strncmp(computer,'PCWIN',5) % PM edited 20160322
+          delete(fullfile(foldername,new_niftifile));
+      else
+          unix(sprintf('rm %s', niftifile));
+      end
+  end
   return; 
 end
 
 % If only header is desired, return now
 if(hdronly) 
-  if(gzipped >=0) unix(sprintf('rm %s', niftifile)); end
+  if(gzipped >=0)
+      if strncmp(computer,'PCWIN',5) % PM edited 20160322
+          delete(fullfile(foldername,new_niftifile));
+      else
+          unix(sprintf('rm %s', niftifile));
+      end
+  end
   return; 
 end
 
@@ -107,8 +134,12 @@ switch(hdr.datatype)
 end
 
 fclose(fp);
-if(gzipped >=0) 
-  unix(sprintf('rm %s', niftifile)); 
+if(gzipped >=0)
+    if strncmp(computer,'PCWIN',5) % PM edited 20160322
+        delete(fullfile(foldername,new_niftifile));
+    else
+        unix(sprintf('rm %s', niftifile));
+    end
 end
 
 % Get total number of voxels
