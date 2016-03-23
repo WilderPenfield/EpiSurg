@@ -45,8 +45,6 @@
 %     clickElec            -If 'y', clicking on electrodes will reveal
 %                           their names in a textbox. Clicking on the box
 %                           should make it disapper. Disabled if 'n'. {default: 'y'}
-%     lineWidth            -Thickness of line connecting pairs of
-%                           electrodes. {default: elecSize/3}
 %     badChans             -Cell array of the names of bad electrodes that
 %                           should be plotted black (for when other
 %                           electrodes are in color). {default: not used}
@@ -82,6 +80,8 @@
 %                           correspond to lineWidth; others will be a ratio
 %                           of that value.
 %                           {default: not used}
+%     lineWidth            -Thickness of line connecting pairs of
+%                           electrodes. {default: elecSize/3}
 %     elecCbar             -'y' or 'n': Plot colorbar next to brain. {default:
 %                           'y' if funcfname elecColors argument specified,
 %                           'n' otherwise}

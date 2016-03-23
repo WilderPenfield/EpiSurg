@@ -18,6 +18,9 @@ function plotMgridOnSlices(fsSub,cfg)
 %  cntrst    - 0< number <=1 The lower this number the lower the brighter
 %              the image (i.e., the lower the voxel value corresponding to 
 %              white). {default: 0.5}
+%  anatOverlay- If 1, color is overlayed on the brain to show FreeSurfer's
+%              automatic segmentation of brain areas (neocortex uses 
+%              Desikan-Killiany parcellation). {default: 0}
 %  pauseOn   - If 1, Matlab pauses after each figure is made and waits for
 %              a keypress. {default: 0}
 %  printFigs - If 1, each figure is output to an eps file. {default: 0}
@@ -46,6 +49,7 @@ if ~isfield(cfg,'mgridFname'),    mgridFname=[];    else mgridFname=cfg.mgridFna
 if ~isfield(cfg,'fullTitle'),     fullTitle=0;      else fullTitle=cfg.fullTitle; end
 if ~isfield(cfg,'markerSize'),    markerSize=30;    else markerSize=cfg.markerSize; end
 if ~isfield(cfg,'cntrst'),    cntrst=.5;          else cntrst=cfg.cntrst; end
+if ~isfield(cfg,'anatOverlay'),    anatOverlay=.5;          else anatOverlay=cfg.anatOverlay; end
 if ~isfield(cfg,'pauseOn'),    pauseOn=0;          else pauseOn=cfg.pauseOn; end
 if ~isfield(cfg,'printFigs'),    printFigs=0;          else printFigs=cfg.printFigs; end
 checkCfg(cfg,'plotMgridOnSlices.m');
@@ -54,6 +58,7 @@ checkCfg(cfg,'plotMgridOnSlices.m');
 % FreeSurfer Subject Directory
 fsdir=getFsurfSubDir();
 
+% Load MRI
 mriFname=fullfile(fsdir,fsSub,'mri','brainmask.mgz');
 if ~exist(mriFname,'file')
    error('File %s not found.',mriFname); 
@@ -63,6 +68,13 @@ mri=MRIread(mriFname);
 mx=max(max(max(mri.vol)))*cntrst;
 mn=min(min(min(mri.vol)));
 sVol=size(mri.vol);
+
+% Load segmentation
+segFname=fullfile(fsdir,fsSub,'mri','aparc+aseg.mgz');
+if ~exist(mriFname,'file')
+   error('File %s not found.',mriFname); 
+end
+seg=MRIread(segFname);
 
 % Load mgrid
 % if strcmpi(mgridFname,'l') || strcmpi(mgridFname,'r')
@@ -86,6 +98,19 @@ for a=1:nElec,
         depthElecs(a)=1;
     end
 end
+
+if universalYes(anatOverlay)
+    %% Load segmentation color table
+    pathstr = fileparts(which('mgrid2matlab'));
+    inFile=fullfile(pathstr,'FreeSurferColorLUTnoFormat.txt');
+    if ~exist(inFile,'file')
+        error('Could not find file %s',inFile);
+    end
+    fid=fopen(inFile,'r');
+    %fid=fopen('/Applications/freesurfer/FreeSurferColorLUTnoFormat.txt','r');
+    tbl=textscan(fid,'%d%s%d%d%d%d');
+    fclose(fid);
+end
     
 for elecId=1:nElec,
     if depthElecs(elecId)
@@ -106,6 +131,22 @@ for elecId=1:nElec,
         axis square;
         set(gca,'xdir','reverse');
         hold on;
+        
+        if universalYes(anatOverlay)
+            % Plot segmentation
+            for a=1:sVol(1),
+                for b=1:sVol(3),
+                    if seg.vol(a,xyz(elecId,2),b)
+                        segId=find(tbl{1}==seg.vol(a,xyz(elecId,2),b));
+                        tempRgb=double([tbl{3}(segId) tbl{4}(segId) tbl{5}(segId)])/255;
+                        hM=patch([-.5 .5 .5 -.5]+b,[-.5 -.5 .5 .5]+a,tempRgb);
+                        set(hM,'LineStyle','none','FaceAlpha',0.3);
+                    end
+                end
+            end
+        end
+        
+        % Plot electrode
         hm(1)=plot(xyz(elecId,3),xyz(elecId,1),'r.');
         set(hm(1),'color',elecRgb(elecId,:),'markersize',markerSize);
         %find image limits
@@ -128,6 +169,21 @@ for elecId=1:nElec,
         imagesc(squeeze(mri.vol(xyz(elecId,1),:,:)),[mn mx]);
         axis square;
         hold on;
+        
+        if universalYes(anatOverlay)
+            % Plot segmentation
+            for a=1:sVol(2),
+                for b=1:sVol(3),
+                    if seg.vol(xyz(elecId,1),a,b)
+                        segId=find(tbl{1}==seg.vol(xyz(elecId,1),a,b));
+                        tempRgb=double([tbl{3}(segId) tbl{4}(segId) tbl{5}(segId)])/255;
+                        hM=patch([-.5 .5 .5 -.5]+b,[-.5 -.5 .5 .5]+a,tempRgb);
+                        set(hM,'LineStyle','none','FaceAlpha',0.3);
+                    end
+                end
+            end
+        end
+        
         hm(2)=plot(xyz(elecId,3),xyz(elecId,2),'r.');
         set(hm(2),'color',elecRgb(elecId,:),'markersize',markerSize);
         %find image limits
@@ -151,6 +207,21 @@ for elecId=1:nElec,
         imagesc(squeeze(mri.vol(:,:,xyz(elecId,3))),[mn mx]);
         axis square;
         hold on;
+        
+        % Plot segmentation
+        if universalYes(anatOverlay)
+            for a=1:sVol(1),
+                for b=1:sVol(2),
+                    if seg.vol(a,b,xyz(elecId,3))
+                        segId=find(tbl{1}==seg.vol(a,b,xyz(elecId,3)));
+                        tempRgb=double([tbl{3}(segId) tbl{4}(segId) tbl{5}(segId)])/255;
+                        hM=patch([-.5 .5 .5 -.5]+b,[-.5 -.5 .5 .5]+a,tempRgb);
+                        set(hM,'LineStyle','none','FaceAlpha',0.3);
+                    end
+                end
+            end
+        end
+        
         hm(3)=plot(xyz(elecId,2),xyz(elecId,1),'r.');
         set(hm(3),'color',elecRgb(elecId,:),'markersize',markerSize);
         %find image limits
