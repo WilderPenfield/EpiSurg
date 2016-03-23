@@ -928,24 +928,37 @@ else
             hold all
             if universalYes(clickElec),
                 if isempty(elecAssign)
-                    set(h_elec,'userdata',elecNames{j});
+                    if elecSphere,
+                        set(h_elec(sph_ct),'userdata',elecNames{j});
+                    else
+                        set(h_elec,'userdata',elecNames{j});
+                    end
                 else
-                    set(h_elec,'userdata',[elecNames{j} ' ' elecAssign{j,2}]);
+                    if elecSphere,
+                        set(h_elec(sph_ct),'userdata',elecNames{j});
+                    else
+                        set(h_elec,'userdata',[elecNames{j} ' ' elecAssign{j,2}]);
+                    end
                 end
                 % This click_text code should put the text out towards the
                 % viewer (so it doesn't get stuck in the brain)
-                pop_fact=5; %this might be too far for lateral surfaces
+                % Note: pop_fact=5 in the below code might be too far for lateral surfaces
                 bdfcn=['Cp = get(gca,''CurrentPoint''); ' ...
                     'Cp=Cp(1,1:3);', ...
                     'v=axis;', ...
                     'campos=get(gca,''cameraposition'');', ...
                     'df=Cp-campos;', ...
                     'nrmd=df/sqrt(sum(df.^2));', ...
-                    sprintf('Cp=Cp-%d*nrmd;',pop_fact), ...
+                    'pop_fact=5;', ...
+                    'eval(sprintf(''Cp=Cp-%d*nrmd;'',pop_fact));', ...
                     'dat=get(gcbo,''userdata'');', ...
                     'ht=text(Cp(1),Cp(2),Cp(3),sprintf(''%s'',dat));', ...
                     'set(ht,''backgroundColor'',''w'',''horizontalalignment'',''center'',''verticalalignment'',''middle'',''buttondownfcn'',''delete(gcbo);'');'];
-                set(h_elec,'buttondownfcn',bdfcn);
+                if elecSphere,
+                    set(h_elec(sph_ct),'buttondownfcn',bdfcn);
+                else
+                    set(h_elec,'buttondownfcn',bdfcn);
+                end
             end
         end
         %NOTE:
