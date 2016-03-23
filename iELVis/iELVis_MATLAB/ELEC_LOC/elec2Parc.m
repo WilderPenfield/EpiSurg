@@ -61,7 +61,7 @@ nElec=size(pialCoordStr,1);
 pialCoord=zeros(nElec,3);
 for a=1:nElec,
     for b=1:3,
-        pialCoord(a,b)=str2num(pialCoordStr{a,b});
+        pialCoord(a,b)=str2double(pialCoordStr{a,b});
     end
 end
 
@@ -108,7 +108,6 @@ for hemLoop=1:2,
     elecIdsThisHem=findStrInCell(hem,elecLabels(:,3));
     nElecThisHem=length(elecIdsThisHem);
     if nElecThisHem,
-        
         %% READ SURFACE
         surfFname=fullfile(surfaceFolder,[lower(hem) 'h.pial']);
         [cort.vert, cort.tri]=read_surf(surfFname);
