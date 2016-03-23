@@ -73,7 +73,6 @@ end
 %% Start diary
 diary_file=fullfile(elecReconPath,['localization_process_' datestr(now,29) '.log']);
 fprintf('Recording command line output in file: \n%s\n',diary_file);
-diary on;
 diary(diary_file)
 
 fprintf('\n================================================================\n');
