@@ -67,6 +67,9 @@ if(strcmpi(ext,'.gz'))
   end
   %fprintf('Uncompressing %s to %s\n',niftifile,new_niftifile);
   if strncmp(computer,'PCWIN',5) % PM edited 20160322
+      if ~exist('C:\Program Files\7-Zip\7z.exe','file')
+          error('Win:no7zip','Could not find 7-Zip. Make sure that it is installed in\n''C:\\Program Files\\7-Zip\\'', or else edit this function\nto direct it to the correct location on your machine.');
+      end
       % get folder and file name
       [foldername,fnameshort]=fileparts(niftifile);
       % execute 7-Zip extract command

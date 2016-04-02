@@ -73,6 +73,9 @@ if (strcmpi(fname((strlen(fname)-3):strlen(fname)), '.MGZ') | ...
       new_fname = sprintf('/tmp/tmp%d.mgh', gzipped); % ORIGINAL LINE
   end
   if strncmp(computer,'PCWIN',5) % PM edited 20160322
+      if ~exist('C:\Program Files\7-Zip\7z.exe','file')
+          error('Win:no7zip','Could not find 7-Zip. Make sure that it is installed in\n''C:\\Program Files\\7-Zip\\'', or else edit this function\nto direct it to the correct location on your machine.');
+      end
       % get folder and file name
       [foldername,fnameshort]=fileparts(fname);
       % execute 7-Zip extract command
