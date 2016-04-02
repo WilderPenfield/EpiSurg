@@ -1,7 +1,7 @@
 function [elecMatrix, elecLabels, elecRgb, elecPairs, elecPresent]=mgrid2matlab(mgridFname)
 %function [elecMatrix, elecLabels, elecRgb, elecPairs, elecPresent]=mgrid2matlab(mgridFname)
 %
-% Optional Inputs:
+% Input:
 %  mgridFname - The filename AND path of the mgrid file you wish to import OR the
 %               freesurfer name of the subject. If not specified, a GUI  
 %               pops up for you to save the file

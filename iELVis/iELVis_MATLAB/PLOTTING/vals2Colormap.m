@@ -10,7 +10,9 @@ function [map, limits, cmap]=vals2Colormap(vals,type,cmap,minmax)
 %
 %
 % Optional Inputs:
-%  cmap   - 'parula' or 'jet'. No effect if 'justpos' or 'justneg' selected as type.
+%  cmap   - 'parula', 'jet', 'rb', or any other MATLAB ordinal colormap
+%           (e.g., 'cool','hot','autumn','bone'). No effect if 'justpos' or 
+%           'justneg' selected as type. 'rb' is a non-MATLAB red-blue colormap.
 %           {default: 'parula' for MATLAB R2014 or more recent, otherwise
 %           'jet'}
 %  minmax - Two element vector specifying the low and high limits of the
@@ -62,20 +64,7 @@ if isnumeric(type)
     if length(type)~=2,
         error('Numeric value of "type" must be two dimensional.');
     end
-    switch cmap
-        case {'parula'}
-            rgb_vals=colormap('parula');
-        case {'jet'}
-            rgb_vals=colormap('jet');
-            %load jet_cmap
-        case {'rb'}
-            %% work in progress? ??
-            rgb_vals=[linspace(0,1,128) ones(1,128); ...
-                linspace(0,1,128) linspace(1,0,128); ...
-                ones(1,128) linspace(1,0,128)]';
-        otherwise
-            error('I do not recognize cmap of type: %s',cmap);
-    end
+    rgb_vals=cmap2rgb_vals(cmap);
     n_colors=size(rgb_vals,1);
     
     cbar_max=max(type);
@@ -88,7 +77,7 @@ if isnumeric(type)
 
 elseif strcmpi(type,'absmax')
     %absmax color scaling
-    rgb_vals=colormap(cmap);
+    rgb_vals=cmap2rgb_vals(cmap);
     n_colors=size(rgb_vals,1);
     
     if isempty(minmax)
@@ -103,7 +92,8 @@ elseif strcmpi(type,'absmax')
     map=rgb_vals(temp_vals,:);
 elseif strcmpi(type,'minmax')
     %minmax color scaling
-    rgb_vals=colormap(cmap);
+    rgb_vals=cmap2rgb_vals(cmap);
+    %     rgb_vals=colormap(cmap);
     n_colors=size(rgb_vals,1);
     
     if isempty(minmax)
@@ -164,3 +154,18 @@ else
 end
 
 limits=[cbar_min cbar_max];
+
+
+function  rgb_vals=cmap2rgb_vals(cmap)
+switch cmap
+    case {'parula','jet','winter','cool','spring','summer','autumn','hsv','hot','gray','bone','copper','pink'}
+        rgb_vals=colormap(cmap);
+        %     case {'jet'}
+        %         rgb_vals=colormap('jet');
+        %         %load jet_cmap
+    case {'rb'}
+        rgb_vals=[linspace(0,1,32)' linspace(0,1,32)' ones(32,1); ...
+            ones(32,1) linspace(1,0,32)' linspace(1,0,32)']; 
+    otherwise
+        error('I do not recognize cmap of type: %s',cmap);
+end
