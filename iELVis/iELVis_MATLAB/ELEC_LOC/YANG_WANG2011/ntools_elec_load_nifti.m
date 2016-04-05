@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+%<<<<<<< HEAD
 function hdr = ntools_elec_load_nifti(niftifile,hdronly)
 % hdr = load_nifti(niftifile,hdronly)
 %
@@ -173,7 +173,7 @@ return;
 
 
 
-=======
+%=======
 function hdr = ntools_elec_load_nifti(niftifile,hdronly)
 % hdr = load_nifti(niftifile,hdronly)
 %
@@ -345,4 +345,4 @@ return;
 
 
 
->>>>>>> origin/master
+%>>>>>>> origin/master
