@@ -140,7 +140,8 @@ if ~isempty(non_depth_ids)
             print(figH(1),'-djpeg',outFigFname);
             outFigFname=fullfile(outPath,sprintf('%s_ShiftDist',sub));
             %outFigFname=sprintf('%s/PICS/electrodes/%s_ShiftDist',erPath,sub);
-            savefig(figH(1),outFigFname);
+            %savefig(figH(1),outFigFname); % PM edit 20160405
+            saveas(figH(1),[outFigFname '.fig']);
             outFigFname=fullfile(outPath,sprintf('%s_ShiftDistOnBrain.jpg',sub));
             %outFigFname=sprintf('%s/PICS/electrodes/%s_ShiftDistOnBrain.jpg',erPath,sub);
             print(figH(2),'-djpeg',outFigFname);
