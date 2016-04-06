@@ -28,7 +28,7 @@
 %     elecShape            -'marker' or 'sphere': The shape used to
 %                           represent electrodes. {default: 'marker'}
 %     elecColors           -2D matrix of colors to fill electrodes
-%                           (rows=electrodes, columns=RGB values) or a vector
+%                           (rows=electrodes, columns=RGB values), a vector
 %                           of values that will be automatically converted
 %                           into a color scale, or 'r' to make all red.
 %                           {default: all electrodes filled with black}
