@@ -11,6 +11,14 @@ function [figH, axH]=plotCtVsDural(sub,printEm,plotPial)
 %
 % This function is called pial by interpStripElec.m and yangWangElecPjct.m
 %
+% Inputs:
+%  sub - Subject's FreeSurfer name/folder
+%  printEm  - If nonzero, copies of the images are output the
+%             "elec_recon/PICS" subfolder of the subject's FreeSurfer folder
+%  plotPial - If nonzero, a figure is created that illustrateds
+%             post-brainshift corrected electrodes color coded by the extent of
+%             brainshift correction.
+%
 % Author: David Groppe
 % Honeylab, Univ. of Toronto
 % June 2015
