@@ -30,7 +30,7 @@
 %     elecColors           -2D matrix of colors to fill electrodes
 %                           (rows=electrodes, columns=RGB values) or a vector
 %                           of values that will be automatically converted
-%                           into a color scale.
+%                           into a color scale, or 'r' to make all red.
 %                           {default: all electrodes filled with black}
 %     edgeBlack            -If 'y', electrodes will all have a black
 %                           border. Otherwise, border will be same color as
@@ -401,7 +401,7 @@ end
 
 % Set/check electrode colorbar plotting options
 if isempty(elecCbar)
-    if ~isempty(elecColors)
+    if ~isempty(elecColors) && ~ischar(elecColors)
         elecCbar='y';
     else
         elecCbar='n';
@@ -815,6 +815,9 @@ else
     % Make electrodes black if no input given
     if isempty(elecColors)
         elecColors = zeros(size(RAS_coor));
+    elseif ischar(elecColors) && strcmp(elecColors,'r')
+        elecColors = zeros(size(RAS_coor));
+        elecColors(:,1) = 1;
     elseif isvector(elecColors)
         if isnumeric(elecColorScale)
             type='minmax';
