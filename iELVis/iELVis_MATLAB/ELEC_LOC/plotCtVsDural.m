@@ -110,6 +110,21 @@ xlabel('Left- Right+');
 ylabel('Pos- Ant+');
 zlabel('Inf- Sup+');
 
+if universalYes(printEm)
+    % Make sure PICS directory exists
+    outPath=fullfile(erPath,'PICS');
+    if ~exist(outPath,'dir')
+        dirSuccess=mkdir(outPath);
+        if ~dirSuccess,
+            error('Could not create directory %s',dirSuccess);
+        end
+    end
+    outFigFname=fullfile(outPath,sprintf('%s_ShiftDist.jpg',sub));
+    print(figH(1),'-djpeg',outFigFname);
+    outFigFname=fullfile(outPath,sprintf('%s_ShiftDist',sub));
+    saveas(figH(1),[outFigFname '.fig']); % PM edit 20160405
+end
+
 % Plot shift distances on pial surface
 if ~isempty(non_depth_ids)
     if universalYes(plotPial)
@@ -135,24 +150,8 @@ if ~isempty(non_depth_ids)
         cfg_out=plotPialSurf(sub,cfg);
         
         if universalYes(printEm)
-            % Make sure PICS directory exists
-            outPath=fullfile(erPath,'PICS');
-            if ~exist(outPath,'dir')
-                dirSuccess=mkdir(outPath);
-                if ~dirSuccess,
-                    error('Could not create directory %s',dirSuccess);
-                end
-            end
-            outFigFname=fullfile(outPath,sprintf('%s_ShiftDist.jpg',sub));
-            %outFigFname=sprintf('%s/PICS/electrodes/%s_ShiftDist.jpg',erPath,sub);
-            print(figH(1),'-djpeg',outFigFname);
-            outFigFname=fullfile(outPath,sprintf('%s_ShiftDist',sub));
-            %outFigFname=sprintf('%s/PICS/electrodes/%s_ShiftDist',erPath,sub);
-            %savefig(figH(1),outFigFname); % PM edit 20160405
-            saveas(figH(1),[outFigFname '.fig']);
             outFigFname=fullfile(outPath,sprintf('%s_ShiftDistOnBrain.jpg',sub));
-            %outFigFname=sprintf('%s/PICS/electrodes/%s_ShiftDistOnBrain.jpg',erPath,sub);
             print(figH(2),'-djpeg',outFigFname);
         end
-    end
+    end 
 end
