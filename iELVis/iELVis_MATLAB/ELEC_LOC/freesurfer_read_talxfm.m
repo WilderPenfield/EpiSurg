@@ -33,7 +33,7 @@ if isequal(fid,-1),
     error(S);
 else
     
-    fprintf('...Reading FreeSurfer talairach.xfm file:\n%s\n',file);
+    %fprintf('...Reading FreeSurfer talairach.xfm file:\n%s\n',file);
     
     % read lines until we get the string 'Linear_Transform', which precedes
     % the data transformation matrix
