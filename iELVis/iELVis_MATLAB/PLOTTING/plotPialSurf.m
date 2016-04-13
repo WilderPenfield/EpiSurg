@@ -1306,6 +1306,7 @@ for h=1:2,
         sub_cfg_out=plotPialSurf(fsSub,sub_cfg);
         
         % Get electrode colormap limits
+        
         if isempty(elecUsedLimits)
             if isfield(sub_cfg_out,'elecCbarLimits')
                 elecUsedLimits=sub_cfg_out.elecCbarLimits;
@@ -1321,8 +1322,12 @@ for h=1:2,
             end
         end
         
+        if isempty(elecCmapName) && isfield(sub_cfg_out,'elecCmapName')
+            elecCmapName=sub_cfg_out.elecCmapName;
+        end
     end
 end
+
 
 %% DRAW COLORBAR(S)
 if universalYes(elecCbar) && universalYes(olayCbar),
