@@ -37,7 +37,9 @@ end
 
 
 % load MRI header
-MRIhdr=MRIread(fullfile(subDir,'mri','orig.mgz'),true); floop=2;
+mgzFname=fullfile(subDir,'mri','orig.mgz');
+checkFile(mgzFname);
+MRIhdr=MRIread(mgzFname,true);
 Norig=MRIhdr.vox2ras; 
 Torig=MRIhdr.tkrvox2ras;
 
@@ -84,47 +86,3 @@ nElec=sum(isDepth);
 % from tksurfer) and want to compute the MNI305 RAS that corresponds to this point:"
 avgCoords=(TalTransform*Norig*(Torig\[ptntCoords'; ones(1, nElec)]))';
 avgCoords=avgCoords(:,1:3);
-
-return
-
-%% Plot in Subject Space
-cfg=[];
-cfg.view='r';
-cfg.figId=floop;
-cfg.elecNames=elecNames;
-cfg.ignoreDepthElec='n';
-cfg.opaqueness=.5;
-cfg.elecCoord=[avgCoords isLeft];
-if floop==1,
-    cfg.title='001.mgz';
-else
-    cfg.title='orig.mgz';
-end
-cfgOut=plotPialSurf('AnRo',cfg);
-
-
-%%
-cfg=[];
-cfg.view='r';
-cfg.figId=3;
-cfg.ignoreDepthElec='n';
-cfg.opaqueness=.5;
-cfg.title='PIAL';
-cfgOut=plotPialSurf('AnRo',cfg);
-
-
-%%
-cfg=[];
-cfg.view='r';
-cfg.figId=floop+10;
-cfg.elecNames=elecNames;
-cfg.ignoreDepthElec='n';
-cfg.opaqueness=.5;
-cfg.elecCoord=[avgCoords isLeft];
-if floop==1,
-    cfg.title='001.mgz';
-else
-    cfg.title='orig.mgz';
-end
-cfgOut=plotPialSurf('fsaverage',cfg);
-
