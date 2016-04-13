@@ -3,9 +3,11 @@ groupAvgCoords=[];
 groupLabels=[];
 groupIsLeft=[];
 subs={'PT001','PT002'};
+cfg=[];
+cfg.rmDepths=1;
 for a=1:length(subs),
     fprintf('Working on Participant %s\n',subs{a});
-    [avgCoords, elecNames, isLeft]=pial2AvgBrain(subs{a},[]);
+    [avgCoords, elecNames, isLeft]=sub2AvgBrain(subs{a},cfg);
     groupAvgCoords=[groupAvgCoords; avgCoords];
     groupLabels=[groupLabels; elecNames];
     groupIsLeft=[groupIsLeft; isLeft];
