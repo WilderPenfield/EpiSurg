@@ -147,7 +147,7 @@ if ~isempty(non_depth_ids)
         cfg.elecNames=chanName;
         cfg.showLabels='n';
         cfg.title=sprintf('%s: CT to Dural distance',sub);
-        cfg_out=plotPialSurf(sub,cfg);
+        plotPialSurf(sub,cfg);
         
         if universalYes(printEm)
             outFigFname=fullfile(outPath,sprintf('%s_ShiftDistOnBrain.jpg',sub));
